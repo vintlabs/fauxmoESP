@@ -109,7 +109,7 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
 
         DEBUG_MSG_FAUXMO("[FAUXMO] Got basicevent1 request\n");
 
-        len -= lenState;
+        len = len - lenState - 1;
         for (int i = lenEvent; i < len; i++) {
             if (message[i] == STATE_PATTERN[0]) {
                 if (strncmp(message + i, STATE_PATTERN, lenState) == 0) {
@@ -160,8 +160,6 @@ void fauxmoESP::_handleTCPClient(AsyncClient *client) {
             client->onDisconnect([this, i](void *s, AsyncClient *c) {
                 DEBUG_MSG_FAUXMO("[FAUXMO] Disconnect for client %i\n", i);
                 _clients[i]->free();
-                delete(_clients[i]);
-                _clients[i] = 0;
             }, 0);
             client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
                 DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
