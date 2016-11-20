@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 void fauxmoESP::_sayHello(IPAddress remoteIP, unsigned int port) {
 
-    DEBUG_MSG("[FAUXMO] Search request from %s\n", remoteIP.toString().c_str());
+    DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s\n", remoteIP.toString().c_str());
 
     AsyncUDP udpClient;
     if (udpClient.connect(remoteIP, port)) {
@@ -41,8 +41,8 @@ void fauxmoESP::_sayHello(IPAddress remoteIP, unsigned int port) {
             DEVICE_PATTERN
         );
 
-        DEBUG_MSG("[FAUXMO] Response (length=%d):\n", strlen(buffer));
-        DEBUG_MSG(buffer);
+        DEBUG_MSG_FAUXMO("[FAUXMO] Response (length=%d):\n", strlen(buffer));
+        DEBUG_MSG_FAUXMO(buffer);
 
         udpClient.print(buffer);
 
@@ -54,7 +54,7 @@ void fauxmoESP::_handleUDPPacket(AsyncUDPPacket packet) {
 
     if (!_enabled) return;
 
-    //DEBUG_MSG("[FAUXMO] Got UDP packet from %s\n", packet.remoteIP().toString().c_str());
+    //DEBUG_MSG_FAUXMO("[FAUXMO] Got UDP packet from %s\n", packet.remoteIP().toString().c_str());
 
     unsigned char * data = packet.data();
     unsigned int lenSearch = strlen(SEARCH_PATTERN);
@@ -84,7 +84,7 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
 
     if (strncmp(message, SETUP_PATTERN, lenSetup) == 0) {
 
-        DEBUG_MSG("[FAUXMO] Got setup.xml request\n");
+        DEBUG_MSG_FAUXMO("[FAUXMO] Got setup.xml request\n");
 
         char xml[350];
         sprintf_P(xml, XML_TEMPLATE, _device_name, _uuid);
@@ -92,15 +92,15 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
         char buffer[600];
         sprintf_P(buffer, SETUP_TEMPLATE, strlen(xml), xml);
 
-        DEBUG_MSG("[FAUXMO] Response (length=%d):\n", strlen(buffer));
-        DEBUG_MSG(buffer);
+        DEBUG_MSG_FAUXMO("[FAUXMO] Response (length=%d):\n", strlen(buffer));
+        DEBUG_MSG_FAUXMO(buffer);
 
         client->write(buffer);
         client->close();
 
     } else if (strncmp(message, EVENT_PATTERN, lenEvent) == 0) {
 
-        DEBUG_MSG("[FAUXMO] Got basicevent1 request\n");
+        DEBUG_MSG_FAUXMO("[FAUXMO] Got basicevent1 request\n");
 
         len -= lenState;
         for (int i = lenEvent; i < len; i++) {
@@ -109,7 +109,7 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
 
                     char state[2] = {0};
                     state[0] = message[i+lenState];
-                    DEBUG_MSG("[FAUXMO] State: %s\n", state);
+                    DEBUG_MSG_FAUXMO("[FAUXMO] State: %s\n", state);
 
                     if (_callback) _callback(state);
 
@@ -122,8 +122,8 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
         char buffer[600];
         sprintf_P(buffer, SOAP_TEMPLATE);
 
-        DEBUG_MSG("[FAUXMO] Response (length=%d):\n", strlen(buffer));
-        DEBUG_MSG(buffer);
+        DEBUG_MSG_FAUXMO("[FAUXMO] Response (length=%d):\n", strlen(buffer));
+        DEBUG_MSG_FAUXMO(buffer);
 
         client->write(buffer);
         client->close();
@@ -142,25 +142,25 @@ void fauxmoESP::_handleTCPClient(AsyncClient *client) {
             _clients[i] = client;
 
             client->onAck([this, i](void *s, AsyncClient *c, size_t len, uint32_t time) {
-                DEBUG_MSG("[FAUXMO] Got ack for client %i len=%u time=%u\n", i, len, time);
+                DEBUG_MSG_FAUXMO("[FAUXMO] Got ack for client %i len=%u time=%u\n", i, len, time);
             }, 0);
 
             client->onData([this, i](void *s, AsyncClient *c, void *data, size_t len) {
-                DEBUG_MSG("[FAUXMO] Got data from client %i len=%i\n", i, len);
+                DEBUG_MSG_FAUXMO("[FAUXMO] Got data from client %i len=%i\n", i, len);
                 _handleTCPPacket(c, data, len);
             }, 0);
 
             client->onDisconnect([this, i](void *s, AsyncClient *c) {
-                DEBUG_MSG("[FAUXMO] Disconnect for client %i\n", i);
+                DEBUG_MSG_FAUXMO("[FAUXMO] Disconnect for client %i\n", i);
                 _clients[i]->free();
                 delete(_clients[i]);
                 _clients[i] = 0;
             }, 0);
             client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
-                DEBUG_MSG("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
+                DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
             }, 0);
             client->onTimeout([this, i](void *s, AsyncClient *c, uint32_t time) {
-                DEBUG_MSG("[FAUXMO] Timeout on client %i at %i\n", i, time);
+                DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client %i at %i\n", i, time);
                 c->close();
             }, 0);
 
@@ -169,7 +169,7 @@ void fauxmoESP::_handleTCPClient(AsyncClient *client) {
         }
     }
 
-    DEBUG_MSG("[FAUXMO] Rejecting client - Too many connections already.\n");
+    DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting client - Too many connections already.\n");
 
     // We cannot accept this connection at the moment
     client->onDisconnect([](void *s, AsyncClient *c) {

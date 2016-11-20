@@ -48,9 +48,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SOAP_TEMPLATE       PSTR("HTTP/1.1 200 OK\r\nCONTENT-LENGTH: 0\r\nCONTENT-TYPE: text/xml\r\nDATE: Sun, 20 Nov 2016 00:00:00 GMT\r\nEXT:\r\nSERVER: Unspecified, UPnP/1.0, Unspecified\r\nX-USER-AGENT: redsonic\r\nCONNECTION: close\r\n\r\n\r\n")
 
 #ifdef DEBUG_FAUXMO
-    #define DEBUG_MSG(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
+    #define DEBUG_MSG_FAUXMO(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
 #else
-    #define DEBUG_MSG(...)
+    #define DEBUG_MSG_FAUXMO(...)
 #endif
 
 typedef std::function<void(const char *)> TStateFunction;
