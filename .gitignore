@@ -1,0 +1,10 @@
+credentials.h
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# PlatformIO folders
+.pioenvs
+.piolibdeps
+pio

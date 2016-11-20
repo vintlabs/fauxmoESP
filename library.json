@@ -1,0 +1,19 @@
+{
+  "name": "fauxmoESP",
+  "keywords": "belkin wemo fauxmo esp8266",
+  "description": "Belkin WeMo emulator for ESP8266",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://bitbucket.org/xoseperez/fauxmoESP.git"
+  },
+  "exclude": "tests",
+  "frameworks": "arduino",
+  "platforms": "*",
+  "authors":
+  {
+    "name": "Xose Perez",
+    "url": "https://bitbucket.org/xoseperez",
+    "maintainer": true
+  }
+}
