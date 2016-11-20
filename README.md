@@ -52,7 +52,7 @@ Then run the "discover devices" option from your Alexa app or web (in the Smart 
 
 ## Compiling with PlatformIO
 
-The library uses ```listenMulticast``` method from AsyncUDP to join the multicast group where the controllers send broadcast messages to identify compatible devices. This method relies on ```udp_set_multicast_netif_addr``` which requires the last git version of the [Arduino Core for ESP8266][1].
+The library uses ```listenMulticast``` method from AsyncUDP to join the multicast group where the controllers send broadcast messages to identify compatible devices. This method relies on ```udp_set_multicast_netif_addr``` which requires the latest git version of the [Arduino Core for ESP8266][1] (after Jul. 11, 2016).
 
 At the moment, PlatformIO is using the stable version so there is no support for it. To enable the staging version of the espressif8266 platform you should follow [this steps][2] to install the development version. Basically you have to run:
 
