@@ -60,7 +60,7 @@ THE SOFTWARE.
     #define DEBUG_MSG_FAUXMO(...)
 #endif
 
-typedef std::function<void(const char *)> TStateFunction;
+typedef std::function<void(bool)> TStateFunction;
 
 class fauxmoESP {
 

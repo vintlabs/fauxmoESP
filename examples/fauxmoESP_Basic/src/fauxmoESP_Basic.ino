@@ -44,8 +44,8 @@ void setup() {
 
     // Fauxmo
     fauxmo.setDeviceName("test light");
-    fauxmo.onMessage([](const char * state) {
-        Serial.printf("[MAIN] State: %s\n", state);
+    fauxmo.onMessage([](bool state) {
+        Serial.printf("[MAIN] State: %s\n", state ? "ON" : "OFF");
     });
 
 }

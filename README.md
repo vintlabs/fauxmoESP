@@ -34,8 +34,8 @@ void setup() {
     ... connect to wifi ...
 
     fauxmo.setDeviceName("test light");
-    fauxmo.onMessage([](const char * state) {
-        Serial.printf("State: %s\n", state);
+    fauxmo.onMessage([](bool state) {
+        Serial.printf("State: %s\n", state ? "ON" : "OFF");
     });
 
 }

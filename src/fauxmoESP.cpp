@@ -114,9 +114,8 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
             if (message[i] == STATE_PATTERN[0]) {
                 if (strncmp(message + i, STATE_PATTERN, lenState) == 0) {
 
-                    char state[2] = {0};
-                    state[0] = message[i+lenState];
-                    DEBUG_MSG_FAUXMO("[FAUXMO] State: %s\n", state);
+                    bool state = (message[i+lenState] == '1');
+                    DEBUG_MSG_FAUXMO("[FAUXMO] State: %s\n", state ? "ON" : "OFF");
 
                     if (_callback) _callback(state);
 
