@@ -9,7 +9,7 @@
   },
   "exclude": "tests",
   "frameworks": "arduino",
-  "platforms": "*",
+  "platforms": "espressif8266",
   "authors":
   {
     "name": "Xose Perez",

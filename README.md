@@ -35,8 +35,8 @@ void setup() {
 
     fauxmo.addDevice("light one");
     fauxmo.addDevice("light two");
-    fauxmo.onMessage([](const char * name, bool state) {
-        Serial.printf("%s state: %s\n", name, state ? "ON" : "OFF");
+    fauxmo.onMessage([](const char * device_name, bool state) {
+        Serial.printf("%s state: %s\n", device_name, state ? "ON" : "OFF");
     });
 
 }
