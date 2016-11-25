@@ -1,19 +1,22 @@
 {
-  "name": "fauxmoESP",
-  "keywords": "belkin wemo fauxmo esp8266",
-  "description": "Belkin WeMo emulator for ESP8266",
-  "repository":
-  {
-    "type": "git",
-    "url": "https://bitbucket.org/xoseperez/fauxmoESP.git"
-  },
-  "exclude": "tests",
-  "frameworks": "arduino",
-  "platforms": "espressif8266",
-  "authors":
-  {
-    "name": "Xose Perez",
-    "url": "https://bitbucket.org/xoseperez",
-    "maintainer": true
-  }
+    "name": "fauxmoESP",
+    "keywords": "belkin,wemo,fauxmo,esp8266,alexa,amazon,echo,dot",
+    "description": "Belkin WeMo emulator for ESP8266, compatible with Alexa (Amazon Echo & Dot)",
+    "repository": {
+        "type": "git",
+        "url": "https://bitbucket.org/xoseperez/fauxmoESP.git"
+    },
+    "version": "1.0.0",
+    "license": "MIT",
+    "exclude": "tests",
+    "frameworks": "arduino",
+    "platforms": "espressif8266",
+    "authors": {
+        "name": "Xose Perez",
+        "url": "https://bitbucket.org/xoseperez",
+        "maintainer": true
+    },
+    "examples": [
+        "examples/*/src/*.ino"
+    ]
 }
