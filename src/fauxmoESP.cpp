@@ -37,21 +37,27 @@ void fauxmoESP::_sayHello(IPAddress remoteIP, unsigned int port) {
     AsyncUDP udpClient;
     if (udpClient.connect(remoteIP, port)) {
 
-        char buffer[350];
-        sprintf_P(buffer,
-            HELLO_TEMPLATE,
-            WiFi.localIP().toString().c_str(),
-            _tcp_port,
-            _uuid,
-            DEVICE_PATTERN,
-            _uuid,
-            DEVICE_PATTERN
-        );
+        for (unsigned int i = 0; i < _devices.size(); i++) {
 
-        DEBUG_MSG_FAUXMO("[FAUXMO] Response (length=%d):\n", strlen(buffer));
-        DEBUG_MSG_FAUXMO(buffer);
+            fauxmoesp_device_t device = _devices[i];
 
-        udpClient.print(buffer);
+            char buffer[350];
+            sprintf_P(buffer,
+                HELLO_TEMPLATE,
+                WiFi.localIP().toString().c_str(),
+                _base_port + i,
+                device.uuid,
+                DEVICE_PATTERN,
+                device.uuid,
+                DEVICE_PATTERN
+            );
+
+            DEBUG_MSG_FAUXMO("[FAUXMO] Response (length=%d):\n", strlen(buffer));
+            DEBUG_MSG_FAUXMO(buffer);
+
+            udpClient.print(buffer);
+
+        }
 
     }
 
@@ -81,9 +87,11 @@ void fauxmoESP::_handleUDPPacket(AsyncUDPPacket packet) {
 
 }
 
-void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
+void fauxmoESP::_handleTCPPacket(unsigned int device_id, AsyncClient *client, void *data, size_t len) {
 
     char * message = (char *) data;
+
+    fauxmoesp_device_t device = _devices[device_id];
 
     unsigned int lenSetup = strlen(SETUP_PATTERN);
     unsigned int lenEvent = strlen(EVENT_PATTERN);
@@ -94,7 +102,7 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
         DEBUG_MSG_FAUXMO("[FAUXMO] Got setup.xml request\n");
 
         char xml[350];
-        sprintf_P(xml, XML_TEMPLATE, _device_name, _uuid);
+        sprintf_P(xml, XML_TEMPLATE, device.name, device.uuid);
 
         char buffer[600];
         sprintf_P(buffer, SETUP_TEMPLATE, strlen(xml), xml);
@@ -115,9 +123,9 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
                 if (strncmp(message + i, STATE_PATTERN, lenState) == 0) {
 
                     bool state = (message[i+lenState] == '1');
-                    DEBUG_MSG_FAUXMO("[FAUXMO] State: %s\n", state ? "ON" : "OFF");
+                    DEBUG_MSG_FAUXMO("[FAUXMO] %s state: %s\n", device.name, state ? "ON" : "OFF");
 
-                    if (_callback) _callback(state);
+                    if (_callback) _callback(device.name, state);
 
                     break;
 
@@ -138,59 +146,81 @@ void fauxmoESP::_handleTCPPacket(AsyncClient *client, void *data, size_t len) {
 
 }
 
-void fauxmoESP::_handleTCPClient(AsyncClient *client) {
+AcConnectHandler fauxmoESP::_getTCPClientHandler(unsigned int device_id) {
 
-    if (!_enabled) return;
+    return [this, device_id](void *s, AsyncClient * client) {
 
-    for (int i = 0; i < TCP_MAX_CLIENTS; i++) {
-        if (!_clients[i] || !_clients[i]->connected()) {
+        if (!_enabled) return;
 
-            _clients[i] = client;
+        for (int i = 0; i < TCP_MAX_CLIENTS; i++) {
+            if (!_clients[i] || !_clients[i]->connected()) {
 
-            client->onAck([this, i](void *s, AsyncClient *c, size_t len, uint32_t time) {
-                DEBUG_MSG_FAUXMO("[FAUXMO] Got ack for client %i len=%u time=%u\n", i, len, time);
-            }, 0);
+                _clients[i] = client;
 
-            client->onData([this, i](void *s, AsyncClient *c, void *data, size_t len) {
-                DEBUG_MSG_FAUXMO("[FAUXMO] Got data from client %i len=%i\n", i, len);
-                _handleTCPPacket(c, data, len);
-            }, 0);
+                client->onAck([this, i](void *s, AsyncClient *c, size_t len, uint32_t time) {
+                    DEBUG_MSG_FAUXMO("[FAUXMO] Got ack for client %i len=%u time=%u\n", i, len, time);
+                }, 0);
 
-            client->onDisconnect([this, i](void *s, AsyncClient *c) {
-                DEBUG_MSG_FAUXMO("[FAUXMO] Disconnect for client %i\n", i);
-                _clients[i]->free();
-            }, 0);
-            client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
-                DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
-            }, 0);
-            client->onTimeout([this, i](void *s, AsyncClient *c, uint32_t time) {
-                DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client %i at %i\n", i, time);
-                c->close();
-            }, 0);
+                client->onData([this, i, device_id](void *s, AsyncClient *c, void *data, size_t len) {
+                    DEBUG_MSG_FAUXMO("[FAUXMO] Got data from client %i len=%i\n", i, len);
+                    _handleTCPPacket(device_id, c, data, len);
+                }, 0);
 
-            return;
+                client->onDisconnect([this, i](void *s, AsyncClient *c) {
+                    DEBUG_MSG_FAUXMO("[FAUXMO] Disconnect for client %i\n", i);
+                    _clients[i]->free();
+                }, 0);
+                client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
+                    DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
+                }, 0);
+                client->onTimeout([this, i](void *s, AsyncClient *c, uint32_t time) {
+                    DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client %i at %i\n", i, time);
+                    c->close();
+                }, 0);
 
+                return;
+
+            }
         }
-    }
 
-    DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting client - Too many connections already.\n");
+        DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting client - Too many connections already.\n");
 
-    // We cannot accept this connection at the moment
-    client->onDisconnect([](void *s, AsyncClient *c) {
-        delete(c);
-    });
-    client->stop();
+        // We cannot accept this connection at the moment
+        client->onDisconnect([](void *s, AsyncClient *c) {
+            delete(c);
+        });
+        client->stop();
+
+    };
 
 }
 
-void fauxmoESP::setDeviceName(const char * device_name) {
-    _device_name = strdup(device_name);
+void fauxmoESP::addDevice(const char * device_name) {
+
+    fauxmoesp_device_t new_device;
+    unsigned int device_id = _devices.size();
+
+    // Copy name
+    new_device.name = strdup(device_name);
+
+    // Create UUID
+    char uuid[15];
+    sprintf(uuid, "444556%06X%02X\0", ESP.getChipId(), device_id); // "DEV" + CHIPID + DEV_ID
+    new_device.uuid = strdup(uuid);
+
+    // TCP Server
+    new_device.server = new AsyncServer(_base_port + device_id);
+    new_device.server->onClient(_getTCPClientHandler(device_id), 0);
+    new_device.server->begin();
+
+    // Attach
+    _devices.push_back(new_device);
+
 }
 
-fauxmoESP::fauxmoESP(unsigned int port) : _tcp(port) {
+fauxmoESP::fauxmoESP(unsigned int port) {
 
-    _tcp_port = port;
-    sprintf(_uuid, "66617578%06X\0", ESP.getChipId()); // "FAUX" + CHIPID
+    _base_port = port;
 
     // UDP Server
     if (_udp.listenMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT)) {
@@ -198,11 +228,5 @@ fauxmoESP::fauxmoESP(unsigned int port) : _tcp(port) {
             _handleUDPPacket(packet);
         });
     }
-
-    // TCP Server
-    _tcp.onClient([this](void *s, AsyncClient* client) {
-        _handleTCPClient(client);
-    }, 0);
-    _tcp.begin();
 
 }

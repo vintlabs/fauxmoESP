@@ -2,7 +2,7 @@
 
 Belkin WeMo emulator library for ESP8266.
 
-This is a library for ESP8266-based devices that emulates a Belkin WeMo device and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Echo or the Dot.
+This is a library for ESP8266-based devices that emulates a Belkin WeMo device and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
 This library is a port of Maker Musings' [Fauxmo Python library][6].
 
@@ -20,7 +20,7 @@ Otherwise you will have to manually install them from sources.
 
 ## Usage
 
-The library is very easy to use, basically instantiate an object, connect to the Wifi, name your device and bind the callback to get the messages. An schematic example could be:
+The library is very easy to use, basically instantiate an object, connect to the Wifi, add one or more virtual devices and bind the callback to get the messages. An schematic example could be:
 
 ```
 #include <fauxmoESP.h>
@@ -33,9 +33,10 @@ void setup() {
 
     ... connect to wifi ...
 
-    fauxmo.setDeviceName("test light");
-    fauxmo.onMessage([](bool state) {
-        Serial.printf("State: %s\n", state ? "ON" : "OFF");
+    fauxmo.addDevice("light one");
+    fauxmo.addDevice("light two");
+    fauxmo.onMessage([](const char * name, bool state) {
+        Serial.printf("%s state: %s\n", name, state ? "ON" : "OFF");
     });
 
 }
