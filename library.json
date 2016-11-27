@@ -1,5 +1,5 @@
 {
-    "name": "fauxmoESP",
+    "name": "FauxmoESP",
     "keywords": "belkin,wemo,fauxmo,esp8266,alexa,amazon,echo,dot",
     "description": "Belkin WeMo emulator for ESP8266, compatible with Alexa (Amazon Echo & Dot)",
     "repository": {
@@ -10,10 +10,14 @@
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
-    "platforms": "espressif8266",
+    "platforms": "espressif8266_stage",
+    "dependencies": [
+        { "name": "ESPAsyncTCP" },
+        { "name": "ESPAsyncUDP" }
+    ],
     "authors": {
         "name": "Xose Perez",
-        "url": "https://bitbucket.org/xoseperez",
+        "url": "http://tinkerman.cat",
         "maintainer": true
     },
     "examples": [
