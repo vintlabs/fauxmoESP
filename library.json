@@ -17,6 +17,7 @@
     ],
     "authors": {
         "name": "Xose Perez",
+        "email": "xose.perez@gmail.com",
         "url": "http://tinkerman.cat",
         "maintainer": true
     },
