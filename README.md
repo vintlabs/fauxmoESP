@@ -63,6 +63,18 @@ pio platform install https://github.com/platformio/platform-espressif8266.git#fe
 
 The ```platformio.ini``` file in the examples is already configured to use the staging version.
 
+## Compiling with Arduino IDE
+
+Same applies to the Arduino IDE. You will need to use the development version of the ESP8266 Arduino Core. Steps to use the library are:
+
+* Install the [latest ESP8266 Arduino Core using these instructions](https://github.com/esp8266/Arduino#using-git-version) (remove before the stable version from your Boards Manager if any).
+* Copy or checkout the ESPAsyncTCP and ESPAsyncUDP libraries in your arduino/libraries folder, it should be under “My Documents/Arduino/libraries” in Windows or “Documents/Arduino/libraries” in Mac or Linux unless you have placed it somewhere else.
+* Same for the fauxmoESP library, check it out in the arduino/libraries folder.
+* Restart your Arduino IDE
+* Look for the fauxmoESP_Basic example under File > Examples > fauxmoESP > …
+* Choose your board and compile.
+
+
 [1]:https://github.com/esp8266/Arduino
 [2]:http://docs.platformio.org/en/stable/platforms/espressif8266.html#using-arduino-framework-with-staging-version
 [3]:https://github.com/me-no-dev/ESPAsyncTCP
