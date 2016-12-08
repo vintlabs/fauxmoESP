@@ -47,6 +47,8 @@ void setup() {
     fauxmo.addDevice("light two");
     fauxmo.onMessage([](const char * device_name, bool state) {
         Serial.printf("[MAIN] %s state: %s\n", device_name, state ? "ON" : "OFF");
+        // GPIO2 is attached to the onboard LED in the ESP12 module:
+        digitalWrite(2, state);
     });
 
 }
