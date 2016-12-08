@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 1.0.0
+FAUXMO ESP 2.0.0
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -29,31 +29,36 @@ THE SOFTWARE.
 #ifndef FAUXMOESP_h
 #define FAUXMOESP_h
 
-#include <Arduino.h>
-#include <ESPAsyncTCP.h>
-#include <ESPAsyncUDP.h>
-#include <functional>
-#include <vector>
-
-#define DEFAULT_TCP_BASE_PORT    52000
+#define DEFAULT_TCP_BASE_PORT   52000
 #define UDP_MULTICAST_IP        IPAddress(239,255,255,250)
 #define UDP_MULTICAST_PORT      1900
-#define TCP_MAX_CLIENTS         5
+#define TCP_MAX_CLIENTS         10
 
-#define FAUXMO_ERROR_NONE       0x00
-#define FAUXMO_ERROR_UDP        0x01
-#define FAUXMO_ERROR_TCP        0x02
+#define UDP_SEARCH_PATTERN      "M-SEARCH"
+#define UDP_DEVICE_PATTERN      "urn:Belkin:device:**"
 
-#define SEARCH_PATTERN          "M-SEARCH"
-#define DEVICE_PATTERN          "urn:Belkin:device:**"
-#define SETUP_PATTERN           "GET /setup.xml HTTP/1.1"
-#define EVENT_PATTERN           "POST /upnp/control/basicevent1 HTTP/1.1"
-#define STATE_PATTERN           "<BinaryState>"
+const char UDP_TEMPLATE[] PROGMEM =
+    "HTTP/1.1 200 OK\r\n"
+    "CACHE-CONTROL: max-age=86400\r\n"
+    "DATE: Sun, 20 Nov 2016 00:00:00 GMT\r\n"
+    "EXT:\r\n"
+    "LOCATION: http://%s:%d/setup.xml\r\n"
+    "OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n"
+    "01-NLS: %s\r\n"
+    "SERVER: Unspecified, UPnP/1.0, Unspecified\r\n"
+    "ST: urn:Belkin:device:**\r\n"
+    "USN: uuid:Socket-1_0-%s::urn:Belkin:device:**\r\n\r\n";
 
-#define HELLO_TEMPLATE          PSTR("HTTP/1.1 200 OK\r\nCACHE-CONTROL: max-age=86400\r\nDATE: Sun, 20 Nov 2016 00:00:00 GMT\r\nEXT:\r\nLOCATION: http://%s:%d/setup.xml\r\nOPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n01-NLS: %s\r\nSERVER: Unspecified, UPnP/1.0, Unspecified\r\nST: %s\r\nUSN: uuid:Socket-1_0-%s::%s\r\n\r\n")
-#define XML_TEMPLATE            PSTR("<?xml version=\"1.0\"?><root><device><deviceType>urn:MakerMusings:device:controllee:1</deviceType><friendlyName>%s</friendlyName><manufacturer>Belkin International Inc.</manufacturer><modelName>Emulated Socket</modelName><modelNumber>3.1415</modelNumber><UDN>uuid:Socket-1_0-%s</UDN></device></root>")
-#define SETUP_TEMPLATE          PSTR("HTTP/1.1 200 OK\r\nCONTENT-LENGTH: %d\r\nCONTENT-TYPE: text/xml\r\nDATE: Sun, 20 Nov 2016 00:00:00 GMT\r\nLAST-MODIFIED: Sat, 01 Jan 2000 00:01:15 GMT\r\nSERVER: Unspecified, UPnP/1.0, Unspecified\r\nX-USER-AGENT: redsonic\r\nCONNECTION: close\r\n\r\n%s\r\n")
-#define SOAP_TEMPLATE           PSTR("HTTP/1.1 200 OK\r\nCONTENT-LENGTH: 0\r\nCONTENT-TYPE: text/xml\r\nDATE: Sun, 20 Nov 2016 00:00:00 GMT\r\nEXT:\r\nSERVER: Unspecified, UPnP/1.0, Unspecified\r\nX-USER-AGENT: redsonic\r\nCONNECTION: close\r\n\r\n\r\n")
+const char SETUP_TEMPLATE[] PROGMEM =
+    "<?xml version=\"1.0\"?>"
+    "<root><device>"
+        "<deviceType>urn:Belkin:device:controllee:1</deviceType>"
+        "<friendlyName>%s</friendlyName>"
+        "<manufacturer>Belkin International Inc.</manufacturer>"
+        "<modelName>FauxmoESP</modelName>"
+        "<modelNumber>2.0.0</modelNumber>"
+        "<UDN>uuid:Socket-1_0-%s</UDN>"
+    "</device></root>";
 
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
@@ -61,12 +66,19 @@ THE SOFTWARE.
     #define DEBUG_MSG_FAUXMO(...)
 #endif
 
-typedef std::function<void(const char *, bool)> TStateFunction;
+#include <Arduino.h>
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncUDP.h>
+#include <Hash.h>
+#include <functional>
+#include <vector>
+
+typedef std::function<void(unsigned char, const char *, bool)> TStateFunction;
 
 typedef struct {
     char * name;
     char * uuid;
-    AsyncServer * server;
+    AsyncWebServer * server;
 } fauxmoesp_device_t;
 
 class fauxmoESP {
@@ -84,13 +96,11 @@ class fauxmoESP {
         unsigned int _base_port = DEFAULT_TCP_BASE_PORT;
         std::vector<fauxmoesp_device_t> _devices;
         AsyncUDP _udp;
-        AsyncClient * _clients[TCP_MAX_CLIENTS];
         TStateFunction _callback = NULL;
 
         void _handleUDPPacket(AsyncUDPPacket packet);
-        AcConnectHandler _getTCPClientHandler(unsigned int device_id);
-        void _handleTCPPacket(unsigned int device_id, AsyncClient *client, void *data, size_t len);
-        void _sayHello(IPAddress remoteIP, unsigned int port);
+        void _handleSetup(AsyncWebServerRequest *request, unsigned int device_id);
+        void _handleContent(AsyncWebServerRequest *request, unsigned int device_id, String content);
 
 };
 

@@ -4,6 +4,7 @@
 #include "credentials.h"
 
 #define SERIAL_BAUDRATE                 115200
+#define LED                             2
 
 fauxmoESP fauxmo;
 
@@ -42,13 +43,18 @@ void setup() {
     // Wifi
     wifiSetup();
 
+    // LED
+    pinMode(LED, OUTPUT);
+    digitalWrite(LED, HIGH);
+
     // Fauxmo
     fauxmo.addDevice("light one");
     fauxmo.addDevice("light two");
-    fauxmo.onMessage([](const char * device_name, bool state) {
-        Serial.printf("[MAIN] %s state: %s\n", device_name, state ? "ON" : "OFF");
-        // GPIO2 is attached to the onboard LED in the ESP12 module:
-        digitalWrite(2, state);
+    fauxmo.addDevice("light three");
+    fauxmo.addDevice("light four");
+    fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
+        Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
+        digitalWrite(LED, !state);
     });
 
 }
