@@ -64,7 +64,7 @@ void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, ui
                     udpClient.endPacket();
                 #else
                     AsyncUDP udpClient;
-                    if (udpClient.connect(remoteIP, remotePort)) {
+                    if (udpClient.connect(remoteIP, remotePort) {
                         udpClient.print(response);
                     }
                 #endif
@@ -163,7 +163,7 @@ fauxmoESP::fauxmoESP(unsigned int port) {
     #else
         if (_udp.listenMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT)) {
             _udp.onPacket([this](AsyncUDPPacket packet) {
-                _handleUDPPacket(packet.remoteIP(), packet.remotePort(), packet.data(), packet.length());
+                _handleUDPPacket(packet.remoteIP(), packet.remotePort(), packet.data(), packet.len());
             });
         }
     #endif

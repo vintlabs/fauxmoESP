@@ -37,9 +37,7 @@ THE SOFTWARE.
 #define UDP_SEARCH_PATTERN      "M-SEARCH"
 #define UDP_DEVICE_PATTERN      "urn:Belkin:device:**"
 
-#ifndef COMPATIBLE_2_3_0
 #define COMPATIBLE_2_3_0        1
-#endif
 
 const char UDP_TEMPLATE[] PROGMEM =
     "HTTP/1.1 200 OK\r\n"

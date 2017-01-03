@@ -63,13 +63,4 @@ void setup() {
 }
 
 void loop() {
-
-    // Since fauxmoESP 2.0 the library uses the "compatibility" mode by
-    // default, this means that it uses WiFiUdp class instead of AsyncUDP.
-    // The later requires the Arduino Core for ESP8266 staging version
-    // whilst the former works fine with current stable 2.3.0 version.
-    // But, since it's not "async" anymore we have to manually poll for UDP
-    // packets
-    fauxmo.handle();
-
 }
