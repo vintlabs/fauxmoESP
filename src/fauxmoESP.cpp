@@ -30,6 +30,53 @@ THE SOFTWARE.
 #include <ESP8266WiFi.h>
 #include "fauxmoESP.h"
 
+void fauxmoESP::_sendUDPResponse() {
+
+    --_roundsLeft;
+    DEBUG_MSG_FAUXMO("[FAUXMO] UDP Responses round #%d\n", MAX_DISCOVERY_ROUNDS - _roundsLeft);
+
+    unsigned int sent = 0;
+    char response[strlen(UDP_TEMPLATE) + 40];
+
+    #if COMPATIBLE_2_3_0
+        WiFiUDP udpClient;
+    #else
+        AsyncUDP udpClient;
+    #endif
+
+    for (unsigned int i = 0; i < _devices.size(); i++) {
+
+        fauxmoesp_device_t device = _devices[i];
+        if (device.hit) continue;
+
+        sprintf_P(response, UDP_TEMPLATE,
+            WiFi.localIP().toString().c_str(),
+            _base_port + i, device.uuid, device.uuid
+        );
+
+        DEBUG_MSG_FAUXMO("[FAUXMO] UDP Response from device #%d (%s)\n", i, device.name);
+
+        #if COMPATIBLE_2_3_0
+            udpClient.beginPacket(_remoteIP, _remotePort);
+            udpClient.write(response);
+            udpClient.endPacket();
+        #else
+            if (udpClient.connect(_remoteIP, _remotePort)) {
+                udpClient.print(response);
+            }
+        #endif
+
+        ++sent;
+
+    }
+
+    if (sent == 0) {
+        DEBUG_MSG_FAUXMO("[FAUXMO] Nothing to do...\n");
+        _roundsLeft = 0;
+    }
+
+}
+
 void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len) {
 
     if (!_enabled) return;
@@ -44,32 +91,21 @@ void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, ui
 
             DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s\n", remoteIP.toString().c_str());
 
-
+            // Set hits to false
             for (unsigned int i = 0; i < _devices.size(); i++) {
-
-                fauxmoesp_device_t device = _devices[i];
-
-                char response[strlen(UDP_TEMPLATE) + 40];
-                sprintf_P(response, UDP_TEMPLATE,
-                    WiFi.localIP().toString().c_str(),
-                    _base_port + i, device.uuid, device.uuid
-                );
-
-                DEBUG_MSG_FAUXMO("[FAUXMO] UDP Response from device #%d (%s)\n", i, device.name);
-
-                #if COMPATIBLE_2_3_0
-                    WiFiUDP udpClient;
-                    udpClient.beginPacket(remoteIP, remotePort);
-                    udpClient.write(response);
-                    udpClient.endPacket();
-                #else
-                    AsyncUDP udpClient;
-                    if (udpClient.connect(remoteIP, remotePort)) {
-                        udpClient.print(response);
-                    }
-                #endif
-
+                _devices[i].hit = false;
             }
+
+            // Send responses
+            _remoteIP = remoteIP;
+            _remotePort = remotePort;
+            _roundsLeft = MAX_DISCOVERY_ROUNDS;
+
+            // We are throwing here the first UDP responses
+            // Calling the handle() method (optional) will retry several times
+            // until all devices have been requested back
+            _lastTick = millis();
+            _sendUDPResponse();
 
         }
     }
@@ -81,6 +117,7 @@ void fauxmoESP::_handleSetup(AsyncWebServerRequest *request, unsigned int device
     if (!_enabled) return;
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /setup.xml\n", device_id);
+    _devices[device_id].hit = true;
 
     fauxmoesp_device_t device = _devices[device_id];
     char response[strlen(SETUP_TEMPLATE) + 50];
@@ -140,8 +177,9 @@ void fauxmoESP::addDevice(const char * device_name) {
 
 }
 
-#if COMPATIBLE_2_3_0
 void fauxmoESP::handle() {
+
+    #if COMPATIBLE_2_3_0
     int len = _udp.parsePacket();
     if (len > 0) {
         IPAddress remoteIP = _udp.remoteIP();
@@ -150,8 +188,16 @@ void fauxmoESP::handle() {
         _udp.read(data, len);
         _handleUDPPacket(remoteIP, remotePort, data, len);
     }
+    #endif
+
+    if (_roundsLeft > 0) {
+        if (millis() - _lastTick > UDP_RESPONSES_INTERVAL) {
+            _lastTick = millis();
+            _sendUDPResponse();
+        }
+    }
+
 }
-#endif
 
 fauxmoESP::fauxmoESP(unsigned int port) {
 

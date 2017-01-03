@@ -37,6 +37,9 @@ THE SOFTWARE.
 #define UDP_SEARCH_PATTERN      "M-SEARCH"
 #define UDP_DEVICE_PATTERN      "urn:Belkin:device:**"
 
+#define UDP_RESPONSES_INTERVAL  1000
+#define MAX_DISCOVERY_ROUNDS    5
+
 #ifndef COMPATIBLE_2_3_0
 #define COMPATIBLE_2_3_0        1
 #endif
@@ -76,8 +79,8 @@ const char SETUP_TEMPLATE[] PROGMEM =
     #include <WiFiUdp.h>
 #else
     #include <ESPAsyncUDP.h>
+    #include <Hash.h>
 #endif
-#include <Hash.h>
 #include <functional>
 #include <vector>
 
@@ -86,6 +89,7 @@ typedef std::function<void(unsigned char, const char *, bool)> TStateFunction;
 typedef struct {
     char * name;
     char * uuid;
+    bool hit;
     AsyncWebServer * server;
 } fauxmoesp_device_t;
 
@@ -97,10 +101,7 @@ class fauxmoESP {
         void addDevice(const char * device_name);
         void onMessage(TStateFunction fn) { _callback = fn; }
         void enable(bool enable) { _enabled = enable; }
-
-        #if COMPATIBLE_2_3_0
-            void handle();
-        #endif
+        void handle();
 
     private:
 
@@ -114,6 +115,12 @@ class fauxmoESP {
         #endif
         TStateFunction _callback = NULL;
 
+        unsigned int _roundsLeft = 0;
+        unsigned long _lastTick;
+        IPAddress _remoteIP;
+        unsigned int _remotePort;
+
+        void _sendUDPResponse();
         void _handleUDPPacket(const IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len);
         void _handleSetup(AsyncWebServerRequest *request, unsigned int device_id);
         void _handleContent(AsyncWebServerRequest *request, unsigned int device_id, String content);
