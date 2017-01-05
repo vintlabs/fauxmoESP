@@ -41,17 +41,10 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
         _base_port + _current, device.uuid, device.uuid
     );
 
-    #if COMPATIBLE_2_3_0
-        WiFiUDP udpClient;
-        udpClient.beginPacket(_remoteIP, _remotePort);
-        udpClient.write(response);
-        udpClient.endPacket();
-    #else
-        AsyncUDP udpClient;
-        if (udpClient.connect(_remoteIP, _remotePort)) {
-            udpClient.print(response);
-        }
-    #endif
+    WiFiUDP udpClient;
+    udpClient.beginPacket(_remoteIP, _remotePort);
+    udpClient.write(response);
+    udpClient.endPacket();
 
 }
 
@@ -220,7 +213,6 @@ void fauxmoESP::addDevice(const char * device_name) {
 
 void fauxmoESP::handle() {
 
-    #if COMPATIBLE_2_3_0
     int len = _udp.parsePacket();
     if (len > 0) {
         IPAddress remoteIP = _udp.remoteIP();
@@ -229,7 +221,6 @@ void fauxmoESP::handle() {
         _udp.read(data, len);
         _handleUDPPacket(remoteIP, remotePort, data, len);
     }
-    #endif
 
     if (_roundsLeft > 0) {
         if (millis() - _lastTick > UDP_RESPONSES_INTERVAL) {
@@ -245,13 +236,6 @@ fauxmoESP::fauxmoESP(unsigned int port) {
     _base_port = port;
 
     // UDP Server
-    #if COMPATIBLE_2_3_0
-        _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
-    #else
-        if (_udp.listenMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT)) {
-            _udp.onPacket([this](AsyncUDPPacket packet) {
-                _handleUDPPacket(packet.remoteIP(), packet.remotePort(), packet.data(), packet.length());
-            });
-        }
-    #endif
+    _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+
 }

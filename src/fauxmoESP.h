@@ -40,10 +40,6 @@ THE SOFTWARE.
 #define UDP_RESPONSES_INTERVAL  100
 #define UDP_RESPONSES_TRIES     5
 
-#ifndef COMPATIBLE_2_3_0
-#define COMPATIBLE_2_3_0        1
-#endif
-
 const char UDP_TEMPLATE[] PROGMEM =
     "HTTP/1.1 200 OK\r\n"
     "CACHE-CONTROL: max-age=86400\r\n"
@@ -86,12 +82,7 @@ const char HEADERS[] PROGMEM =
 
 #include <Arduino.h>
 #include <ESPAsyncTCP.h>
-#if COMPATIBLE_2_3_0
-    #include <WiFiUdp.h>
-#else
-    #include <ESPAsyncUDP.h>
-    #include <Hash.h>
-#endif
+#include <WiFiUdp.h>
 #include <functional>
 #include <vector>
 
@@ -119,11 +110,7 @@ class fauxmoESP {
         bool _enabled = true;
         unsigned int _base_port = DEFAULT_TCP_BASE_PORT;
         std::vector<fauxmoesp_device_t> _devices;
-        #if COMPATIBLE_2_3_0
-            WiFiUDP _udp;
-        #else
-            AsyncUDP _udp;
-        #endif
+        WiFiUDP _udp;
         AsyncClient * _clients[TCP_MAX_CLIENTS];
         TStateFunction _callback = NULL;
 

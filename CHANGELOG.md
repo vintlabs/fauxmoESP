@@ -3,14 +3,16 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.0] 2017-01-03
+## [2.0.0] 2017-01-05
 ### Added
-- Compatibility mode (by default) allows you to compile the library against current stable release of Arduino Code for ESP8266
-- UDP polling is required when in compatibility mode (by default)
-- Using ESPAsyncWebServer for TCP requests
+- Different discovery strategies to maximize device discovery
+- UDP polling required (call handle() in your loop)
 
 ### Changed
-- Callback signature changed to add device_id
+- ```onMessage``` callback signature changed to add device_id
+
+### Removed
+- Removed dependency on ESPAsyncUDP for compatibility with current stable release of Arduino Code for ESP8266
 
 ## [1.0.0] 2016-11-26
 ### Added

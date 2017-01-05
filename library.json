@@ -12,9 +12,7 @@
     "frameworks": "arduino",
     "platforms": "espressif8266",
     "dependencies": [
-        { "name": "ESPAsyncTCP" },
-        { "name": "ESPAsyncWebServer" },
-        { "name": "ESPAsyncUDP" }
+        { "name": "ESPAsyncTCP" }
     ],
     "authors": {
         "name": "Xose Perez",
