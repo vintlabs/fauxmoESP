@@ -63,4 +63,11 @@ void setup() {
 }
 
 void loop() {
+
+    // Since fauxmoESP 2.0 the library performs different actions to increase
+    // the chance of discovery. This means that we have to manually call the handle
+    // method during discovery, so it can keep track of the messages sent and
+    // received.
+    fauxmo.handle();
+
 }

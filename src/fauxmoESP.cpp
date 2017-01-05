@@ -30,51 +30,48 @@ THE SOFTWARE.
 #include <ESP8266WiFi.h>
 #include "fauxmoESP.h"
 
-void fauxmoESP::_sendUDPResponse() {
+void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
 
-    --_roundsLeft;
-    DEBUG_MSG_FAUXMO("[FAUXMO] UDP Responses round #%d\n", MAX_DISCOVERY_ROUNDS - _roundsLeft);
+    fauxmoesp_device_t device = _devices[device_id];
+    DEBUG_MSG_FAUXMO("[FAUXMO] UDP response for device #%d (%s)\n", _current, device.name);
 
-    unsigned int sent = 0;
     char response[strlen(UDP_TEMPLATE) + 40];
+    sprintf_P(response, UDP_TEMPLATE,
+        WiFi.localIP().toString().c_str(),
+        _base_port + _current, device.uuid, device.uuid
+    );
 
     #if COMPATIBLE_2_3_0
         WiFiUDP udpClient;
+        udpClient.beginPacket(_remoteIP, _remotePort);
+        udpClient.write(response);
+        udpClient.endPacket();
     #else
         AsyncUDP udpClient;
+        if (udpClient.connect(_remoteIP, _remotePort)) {
+            udpClient.print(response);
+        }
     #endif
 
-    for (unsigned int i = 0; i < _devices.size(); i++) {
+}
 
-        fauxmoesp_device_t device = _devices[i];
-        if (device.hit) continue;
+void fauxmoESP::_nextUDPResponse() {
 
-        sprintf_P(response, UDP_TEMPLATE,
-            WiFi.localIP().toString().c_str(),
-            _base_port + i, device.uuid, device.uuid
-        );
-
-        DEBUG_MSG_FAUXMO("[FAUXMO] UDP Response from device #%d (%s)\n", i, device.name);
-
-        #if COMPATIBLE_2_3_0
-            udpClient.beginPacket(_remoteIP, _remotePort);
-            udpClient.write(response);
-            udpClient.endPacket();
-        #else
-            if (udpClient.connect(_remoteIP, _remotePort)) {
-                udpClient.print(response);
-            }
-        #endif
-
-        ++sent;
-
+    while (_roundsLeft) {
+        if (_devices[_current].hit == false) break;
+        if (++_current == _devices.size()) {
+            --_roundsLeft;
+            _current = 0;
+        }
     }
 
-    if (sent == 0) {
-        DEBUG_MSG_FAUXMO("[FAUXMO] Nothing to do...\n");
-        _roundsLeft = 0;
+    if (_roundsLeft > 0) {
+        _sendUDPResponse(_current);
+        if (++_current == _devices.size()) {
+            --_roundsLeft;
+            _current = 0;
+        }
     }
-
 }
 
 void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len) {
@@ -99,49 +96,102 @@ void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, ui
             // Send responses
             _remoteIP = remoteIP;
             _remotePort = remotePort;
-            _roundsLeft = MAX_DISCOVERY_ROUNDS;
-
-            // We are throwing here the first UDP responses
-            // Calling the handle() method (optional) will retry several times
-            // until all devices have been requested back
-            _lastTick = millis();
-            _sendUDPResponse();
+            _current = random(0, _devices.size());
+            _roundsLeft = UDP_RESPONSES_TRIES;
 
         }
     }
 
 }
 
-void fauxmoESP::_handleSetup(AsyncWebServerRequest *request, unsigned int device_id) {
+void fauxmoESP::_sendTCPPacket(AsyncClient *client, const char * response) {
+    char buffer[strlen(HEADERS) + strlen(response) + 10];
+    sprintf_P(buffer, HEADERS, strlen(response), response);
+    client->write(buffer);
+}
 
-    if (!_enabled) return;
+void fauxmoESP::_handleTCPPacket(unsigned int device_id, AsyncClient *client, void *data, size_t len) {
 
-    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /setup.xml\n", device_id);
-    _devices[device_id].hit = true;
+    ((char * )data)[len] = 0;
+    String content = String((char *) data);
 
     fauxmoesp_device_t device = _devices[device_id];
-    char response[strlen(SETUP_TEMPLATE) + 50];
-    sprintf_P(response, SETUP_TEMPLATE, device.name, device.uuid);
-    request->send(200, "text/xml", response);
+
+    if (content.indexOf("GET /setup.xml") == 0) {
+
+        DEBUG_MSG_FAUXMO("[FAUXMO] /setup.xml response for device #%d (%s)\n", device_id, device.name);
+
+        _devices[device_id].hit = true;
+        char response[strlen(SETUP_TEMPLATE) + 50];
+        sprintf_P(response, SETUP_TEMPLATE, device.name, device.uuid);
+        _sendTCPPacket(client, response);
+        client->close();
+
+    }
+
+    if (content.indexOf("POST /upnp/control/basicevent1") == 0) {
+
+        if (content.indexOf("<BinaryState>0</BinaryState>") > 0) {
+            if (_callback) _callback(device_id, device.name, false);
+        }
+
+        if (content.indexOf("<BinaryState>1</BinaryState>") > 0) {
+            if (_callback) _callback(device_id, device.name, true);
+        }
+
+        _sendTCPPacket(client, "");
+        client->close();
+
+    }
 
 }
 
-void fauxmoESP::_handleContent(AsyncWebServerRequest *request, unsigned int device_id, String content) {
+AcConnectHandler fauxmoESP::_getTCPClientHandler(unsigned int device_id) {
 
-    if (!_enabled) return;
+    return [this, device_id](void *s, AsyncClient * client) {
 
-    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
-    fauxmoesp_device_t device = _devices[device_id];
+        if (!_enabled) return;
 
-    if (content.indexOf("<BinaryState>0</BinaryState>") > 0) {
-        if (_callback) _callback(device_id, device.name, false);
-    }
+        for (int i = 0; i < TCP_MAX_CLIENTS; i++) {
+            if (!_clients[i] || !_clients[i]->connected()) {
 
-    if (content.indexOf("<BinaryState>1</BinaryState>") > 0) {
-        if (_callback) _callback(device_id, device.name, true);
-    }
+                _clients[i] = client;
 
-    request->send(200);
+                client->onAck([this, i](void *s, AsyncClient *c, size_t len, uint32_t time) {
+                    //DEBUG_MSG_FAUXMO("[FAUXMO] Got ack for client %i len=%u time=%u\n", i, len, time);
+                }, 0);
+
+                client->onData([this, i, device_id](void *s, AsyncClient *c, void *data, size_t len) {
+                    //DEBUG_MSG_FAUXMO("[FAUXMO] Got data from client %i len=%i\n", i, len);
+                    _handleTCPPacket(device_id, c, data, len);
+                }, 0);
+
+                client->onDisconnect([this, i](void *s, AsyncClient *c) {
+                    //DEBUG_MSG_FAUXMO("[FAUXMO] Disconnect for client %i\n", i);
+                    _clients[i]->free();
+                }, 0);
+                client->onError([this, i](void *s, AsyncClient *c, int8_t error) {
+                    //DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%i) on client %i\n", c->errorToString(error), error, i);
+                }, 0);
+                client->onTimeout([this, i](void *s, AsyncClient *c, uint32_t time) {
+                    //DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client %i at %i\n", i, time);
+                    c->close();
+                }, 0);
+
+                return;
+
+            }
+        }
+
+        DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting client - Too many connections already.\n");
+
+        // We cannot accept this connection at the moment
+        client->onDisconnect([](void *s, AsyncClient *c) {
+            delete(c);
+        });
+        client->stop();
+
+    };
 
 }
 
@@ -159,17 +209,8 @@ void fauxmoESP::addDevice(const char * device_name) {
     new_device.uuid = strdup(uuid);
 
     // TCP Server
-    new_device.server = new AsyncWebServer(_base_port + device_id);
-    new_device.server->on("/setup.xml", HTTP_GET, [this, device_id](AsyncWebServerRequest *request){
-        _handleSetup(request, device_id);
-    });
-    new_device.server->onRequestBody([this, device_id](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-        char * tmp = (char *) data;
-        tmp[len] = 0;
-        String content = String(tmp);
-        _handleContent(request, device_id, content);
-    });
-
+    new_device.server = new AsyncServer(_base_port + device_id);
+    new_device.server->onClient(_getTCPClientHandler(device_id), 0);
     new_device.server->begin();
 
     // Attach
@@ -193,7 +234,7 @@ void fauxmoESP::handle() {
     if (_roundsLeft > 0) {
         if (millis() - _lastTick > UDP_RESPONSES_INTERVAL) {
             _lastTick = millis();
-            _sendUDPResponse();
+            _nextUDPResponse();
         }
     }
 

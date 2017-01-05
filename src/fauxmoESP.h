@@ -37,8 +37,8 @@ THE SOFTWARE.
 #define UDP_SEARCH_PATTERN      "M-SEARCH"
 #define UDP_DEVICE_PATTERN      "urn:Belkin:device:**"
 
-#define UDP_RESPONSES_INTERVAL  1000
-#define MAX_DISCOVERY_ROUNDS    5
+#define UDP_RESPONSES_INTERVAL  100
+#define UDP_RESPONSES_TRIES     5
 
 #ifndef COMPATIBLE_2_3_0
 #define COMPATIBLE_2_3_0        1
@@ -67,6 +67,17 @@ const char SETUP_TEMPLATE[] PROGMEM =
         "<UDN>uuid:Socket-1_0-%s</UDN>"
     "</device></root>";
 
+const char HEADERS[] PROGMEM =
+    "HTTP/1.1 200 OK\r\n"
+    "CONTENT-LENGTH: %d\r\n"
+    "CONTENT-TYPE: text/xml\r\n"
+    "DATE: Sun, 01 Jan 2017 00:00:00 GMT\r\n"
+    "LAST-MODIFIED: Sat, 01 Jan 2017 00:00:00 GMT\r\n"
+    "SERVER: Unspecified, UPnP/1.0, Unspecified\r\n"
+    "X-USER-AGENT: redsonic\r\n"
+    "CONNECTION: close\r\n\r\n"
+    "%s\r\n";
+
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
 #else
@@ -74,7 +85,7 @@ const char SETUP_TEMPLATE[] PROGMEM =
 #endif
 
 #include <Arduino.h>
-#include <ESPAsyncWebServer.h>
+#include <ESPAsyncTCP.h>
 #if COMPATIBLE_2_3_0
     #include <WiFiUdp.h>
 #else
@@ -90,7 +101,7 @@ typedef struct {
     char * name;
     char * uuid;
     bool hit;
-    AsyncWebServer * server;
+    AsyncServer * server;
 } fauxmoesp_device_t;
 
 class fauxmoESP {
@@ -113,17 +124,22 @@ class fauxmoESP {
         #else
             AsyncUDP _udp;
         #endif
+        AsyncClient * _clients[TCP_MAX_CLIENTS];
         TStateFunction _callback = NULL;
 
         unsigned int _roundsLeft = 0;
+        unsigned int _current = 0;
         unsigned long _lastTick;
         IPAddress _remoteIP;
         unsigned int _remotePort;
 
-        void _sendUDPResponse();
+        void _sendUDPResponse(unsigned int device_id);
+        void _nextUDPResponse();
         void _handleUDPPacket(const IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len);
-        void _handleSetup(AsyncWebServerRequest *request, unsigned int device_id);
-        void _handleContent(AsyncWebServerRequest *request, unsigned int device_id, String content);
+
+        void _sendTCPPacket(AsyncClient *client, const char * response);
+        AcConnectHandler _getTCPClientHandler(unsigned int device_id);
+        void _handleTCPPacket(unsigned int device_id, AsyncClient *client, void *data, size_t len);
 
 };
 
