@@ -6,11 +6,11 @@ This is a library for ESP8266-based devices that emulates a Belkin WeMo device a
 
 This library is a port of Maker Musings' [Fauxmo Python library][6].
 
-**Current Version is 2.0.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
+**Current Version is 2.1.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
 
 ## Dependencies
 
-This library uses [ESPAsyncTCP][3] library by [me-no-dev][5].
+This library uses [ESPAsyncTCP][3] and [ESPAsyncWebServer][4] libraries by [me-no-dev][5].
 
 ### PlatformIO
 
@@ -18,7 +18,9 @@ If you are using PlatformIO (check the section bellow on how to compile it) you 
 
 ```
 
-lib_deps = ESPAsyncTCP
+lib_deps =
+    ESPAsyncTCP
+    ESPAsyncWebServer
 ```
 
 ### Arduino IDE
@@ -29,7 +31,8 @@ You can look for it manually but I have gathered the URL here for convenience:
 
 |Library|Repository|ZIP|
 |-|-|-|
-|**ESPAsyncTCP** by Hristo Gochkov|[GIT](https://github.com/me-no-dev/ESPAsyncTCP)|[ZIP](https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip)||
+|**ESPAsyncTCP** by Hristo Gochkov|[GIT](https://github.com/me-no-dev/ESPAsyncTCP)|[ZIP](https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip)|
+|**ESPAsyncWebServer** by Hristo Gochkov|[GIT](https://github.com/me-no-dev/ESPAsyncWebServer)|[ZIP](https://github.com/me-no-dev/ESPAsyncWebServer/archive/master.zip)||
 
 ## Usage
 
@@ -81,5 +84,6 @@ The strategies the library uses to improve discoverability are:
 [1]:https://github.com/esp8266/Arduino
 [2]:http://docs.platformio.org/en/stable/platforms/espressif8266.html#using-arduino-framework-with-staging-version
 [3]:https://github.com/me-no-dev/ESPAsyncTCP
+[4]:https://github.com/me-no-dev/ESPAsyncWebServer
 [5]:https://github.com/me-no-dev
 [6]:https://github.com/makermusings/fauxmo

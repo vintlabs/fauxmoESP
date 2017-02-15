@@ -8,3 +8,5 @@ utils
 # PlatformIO folders
 .pio*
 pio
+.clang_complete
+.gcc-flags.json

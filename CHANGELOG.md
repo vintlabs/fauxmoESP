@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.0] 2017-02-15
+### Added
+- ESPAsyncWebServer to manage TCP connections
+
+### Fixed
+- Memory leaks in UDP and TCP connections
+
 ## [2.0.0] 2017-01-05
 ### Added
 - Different discovery strategies to maximize device discovery

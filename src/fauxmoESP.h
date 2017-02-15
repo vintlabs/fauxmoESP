@@ -37,7 +37,7 @@ THE SOFTWARE.
 #define UDP_SEARCH_PATTERN      "M-SEARCH"
 #define UDP_DEVICE_PATTERN      "urn:Belkin:device:**"
 
-#define UDP_RESPONSES_INTERVAL  100
+#define UDP_RESPONSES_INTERVAL  250
 #define UDP_RESPONSES_TRIES     5
 
 const char UDP_TEMPLATE[] PROGMEM =
@@ -81,6 +81,8 @@ const char HEADERS[] PROGMEM =
 #endif
 
 #include <Arduino.h>
+#include <ESPAsyncWebServer.h>
+#include <Hash.h>
 #include <ESPAsyncTCP.h>
 #include <WiFiUdp.h>
 #include <functional>
@@ -92,7 +94,7 @@ typedef struct {
     char * name;
     char * uuid;
     bool hit;
-    AsyncServer * server;
+    AsyncWebServer * server;
 } fauxmoesp_device_t;
 
 class fauxmoESP {
@@ -102,7 +104,7 @@ class fauxmoESP {
         fauxmoESP(unsigned int port = DEFAULT_TCP_BASE_PORT);
         void addDevice(const char * device_name);
         void onMessage(TStateFunction fn) { _callback = fn; }
-        void enable(bool enable) { _enabled = enable; }
+        void enable(bool enable);
         void handle();
 
     private:
@@ -111,7 +113,6 @@ class fauxmoESP {
         unsigned int _base_port = DEFAULT_TCP_BASE_PORT;
         std::vector<fauxmoesp_device_t> _devices;
         WiFiUDP _udp;
-        AsyncClient * _clients[TCP_MAX_CLIENTS];
         TStateFunction _callback = NULL;
 
         unsigned int _roundsLeft = 0;
@@ -123,10 +124,8 @@ class fauxmoESP {
         void _sendUDPResponse(unsigned int device_id);
         void _nextUDPResponse();
         void _handleUDPPacket(const IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len);
-
-        void _sendTCPPacket(AsyncClient *client, const char * response);
-        AcConnectHandler _getTCPClientHandler(unsigned int device_id);
-        void _handleTCPPacket(unsigned int device_id, AsyncClient *client, void *data, size_t len);
+        void _handleSetup(AsyncWebServerRequest *request, unsigned int device_id);
+        void _handleContent(AsyncWebServerRequest *request, unsigned int device_id, char * content);
 
 };
 

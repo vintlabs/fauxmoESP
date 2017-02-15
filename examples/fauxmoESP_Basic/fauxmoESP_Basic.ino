@@ -52,18 +52,6 @@ void setup() {
     fauxmo.addDevice("light two");
     fauxmo.addDevice("light three");
     fauxmo.addDevice("light four");
-    fauxmo.addDevice("light five");
-    fauxmo.addDevice("light six");
-    fauxmo.addDevice("light seven");
-    fauxmo.addDevice("light eight");
-    fauxmo.addDevice("switch one");
-    fauxmo.addDevice("switch two");
-    fauxmo.addDevice("switch three");
-    fauxmo.addDevice("switch four");
-    fauxmo.addDevice("switch five");
-    fauxmo.addDevice("switch six");
-    fauxmo.addDevice("switch seven");
-    fauxmo.addDevice("switch eight");
 
     // fauxmoESP 2.0.0 has changed the callback signature to add the device_id, this WARRANTY
     // it's easier to match devices to action without having to compare strings.
@@ -83,5 +71,12 @@ void loop() {
     // But, since it's not "async" anymore we have to manually poll for UDP
     // packets
     fauxmo.handle();
+
+
+    static unsigned long last = millis();
+    if (millis() - last > 5000) {
+        last = millis();
+        Serial.printf("[MAIN] Free heap: %d bytes\n", ESP.getFreeHeap());
+    }
 
 }
