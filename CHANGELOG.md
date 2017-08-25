@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.1] 2017-08-25
+### Fixed
+- Call UDP beginMulticast on onStationModeGotIP
+
 ## [2.1.0] 2017-02-15
 ### Added
 - ESPAsyncWebServer to manage TCP connections

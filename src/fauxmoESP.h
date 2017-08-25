@@ -112,6 +112,7 @@ class fauxmoESP {
         bool _enabled = true;
         unsigned int _base_port = DEFAULT_TCP_BASE_PORT;
         std::vector<fauxmoesp_device_t> _devices;
+        WiFiEventHandler _handler;
         WiFiUDP _udp;
         TStateFunction _callback = NULL;
 

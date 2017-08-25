@@ -47,7 +47,11 @@ void setup() {
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
 
-    // Fauxmo
+    // You can enable or disable the library at any moment
+    // Disabling it will prevent the devices from being discovered and switched
+    fauxmo.enable(true);
+
+    // Add virtual devices
     fauxmo.addDevice("light one");
     fauxmo.addDevice("light two");
     fauxmo.addDevice("light three");

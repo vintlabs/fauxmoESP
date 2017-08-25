@@ -201,7 +201,10 @@ fauxmoESP::fauxmoESP(unsigned int port) {
 
     _base_port = port;
 
-    // UDP Server
-    _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+    // Start UDP server on STA connection
+    _handler = WiFi.onStationModeGotIP([this](WiFiEventStationModeGotIP ipInfo) {
+        _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+        DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
+    });
 
 }
