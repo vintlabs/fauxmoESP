@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 2.0.0
+FAUXMO ESP 2.2.0
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -26,8 +26,7 @@ THE SOFTWARE.
 
 */
 
-#ifndef FAUXMOESP_h
-#define FAUXMOESP_h
+#pragma once
 
 #define DEFAULT_TCP_BASE_PORT   52000
 #define UDP_MULTICAST_IP        IPAddress(239,255,255,250)
@@ -71,8 +70,7 @@ const char HEADERS[] PROGMEM =
     "LAST-MODIFIED: Sat, 01 Jan 2017 00:00:00 GMT\r\n"
     "SERVER: Unspecified, UPnP/1.0, Unspecified\r\n"
     "X-USER-AGENT: redsonic\r\n"
-    "CONNECTION: close\r\n\r\n"
-    "%s\r\n";
+    "CONNECTION: close\r\n\r\n";
 
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
@@ -81,8 +79,6 @@ const char HEADERS[] PROGMEM =
 #endif
 
 #include <Arduino.h>
-#include <ESPAsyncWebServer.h>
-#include <Hash.h>
 #include <ESPAsyncTCP.h>
 #include <WiFiUdp.h>
 #include <functional>
@@ -94,7 +90,7 @@ typedef struct {
     char * name;
     char * uuid;
     bool hit;
-    AsyncWebServer * server;
+    AsyncServer * server;
 } fauxmoesp_device_t;
 
 class fauxmoESP {
@@ -114,6 +110,7 @@ class fauxmoESP {
         std::vector<fauxmoesp_device_t> _devices;
         WiFiEventHandler _handler;
         WiFiUDP _udp;
+        AsyncClient * _tcpClients[TCP_MAX_CLIENTS];
         TStateFunction _callback = NULL;
 
         unsigned int _roundsLeft = 0;
@@ -124,10 +121,10 @@ class fauxmoESP {
 
         void _sendUDPResponse(unsigned int device_id);
         void _nextUDPResponse();
-        void _handleUDPPacket(const IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len);
-        void _handleSetup(AsyncWebServerRequest *request, unsigned int device_id);
-        void _handleContent(AsyncWebServerRequest *request, unsigned int device_id, char * content);
+        void _handleSetup(AsyncClient *client, unsigned int device_id);
+        void _handleContent(AsyncClient *client, unsigned int device_id, void *data, size_t len);
+        void _onUDPData(const IPAddress remoteIP, unsigned int remotePort, void *data, size_t len);
+        void _onTCPData(AsyncClient *client, unsigned int device_id, void *data, size_t len);
+        void _onTCPClient(AsyncClient *client, unsigned int device_id);
 
 };
-
-#endif

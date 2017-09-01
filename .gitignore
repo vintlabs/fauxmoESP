@@ -10,3 +10,5 @@ utils
 pio
 .clang_complete
 .gcc-flags.json
+.pioenvs
+.piolibdeps

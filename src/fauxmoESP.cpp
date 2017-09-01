@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 2.0.0
+FAUXMO ESP 2.2.0
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -72,14 +72,15 @@ void fauxmoESP::_nextUDPResponse() {
     }
 }
 
-void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, uint8_t *data, size_t len) {
+void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *data, size_t len) {
 
     if (!_enabled) return;
 
-    data[len] = 0;
+    char * p = (char *) data;
+    p[len] = 0;
 
-    if (strstr((char *) data, UDP_SEARCH_PATTERN) == (char *) data) {
-        if (strstr((char *) data, UDP_DEVICE_PATTERN) != NULL) {
+    if (strstr(p, UDP_SEARCH_PATTERN) == (char *) data) {
+        if (strstr(p, UDP_DEVICE_PATTERN) != NULL) {
 
             #ifdef DEBUG_FAUXMO
                 char buffer[16];
@@ -103,23 +104,27 @@ void fauxmoESP::_handleUDPPacket(IPAddress remoteIP, unsigned int remotePort, ui
 
 }
 
-void fauxmoESP::_handleSetup(AsyncWebServerRequest *request, unsigned int device_id) {
-
-    if (!_enabled) return;
+void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id) {
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /setup.xml\n", device_id);
     _devices[device_id].hit = true;
-
     fauxmoesp_device_t device = _devices[device_id];
-    char response[strlen(SETUP_TEMPLATE) + 50];
+
+    char response[strlen_P(SETUP_TEMPLATE) + 20];
     sprintf_P(response, SETUP_TEMPLATE, device.name, device.uuid);
-    request->send(200, "text/xml", response);
+
+    char headers[strlen_P(HEADERS) + 10];
+    sprintf_P(headers, HEADERS, strlen(response));
+
+    client->write(headers, strlen(headers));
+    client->write(response, strlen(response));
 
 }
 
-void fauxmoESP::_handleContent(AsyncWebServerRequest *request, unsigned int device_id, char * content) {
+void fauxmoESP::_handleContent(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
 
-    if (!_enabled) return;
+    char content[len+1];
+    memcpy(content, data, len);
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
     fauxmoesp_device_t device = _devices[device_id];
@@ -131,6 +136,72 @@ void fauxmoESP::_handleContent(AsyncWebServerRequest *request, unsigned int devi
     if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
         if (_callback) _callback(device_id, device.name, true);
     }
+
+    char headers[strlen_P(HEADERS) + 10];
+    sprintf_P(headers, HEADERS, 0);
+    client->write(headers, strlen(headers));
+
+}
+
+void fauxmoESP::_onTCPData(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
+
+    if (!_enabled) return;
+
+    char setup[] = {"GET /setup.xml HTTP/1.1"};
+    if (memcmp(data, setup, strlen(setup)-1) == 0) {
+        _handleSetup(client, device_id);
+    }
+
+    char event[] = {"POST /upnp/control/basicevent1 HTTP/1.1"};
+    if (memcmp(data, event, strlen(event)-1) == 0) {
+        _handleContent(client, device_id, data, len);
+    }
+
+}
+
+void fauxmoESP::_onTCPClient(AsyncClient *client, unsigned int device_id) {
+
+    client->onDisconnect([](void *s, AsyncClient *c) {
+        delete(c);
+    });
+
+    for (unsigned char i = 0; i < TCP_MAX_CLIENTS; i++) {
+
+        if (!_tcpClients[i] || !_tcpClients[i]->connected()) {
+
+            _tcpClients[i] = client;
+
+            client->onAck([i](void *s, AsyncClient *c, size_t len, uint32_t time) {
+            }, 0);
+
+            client->onData([this, i, device_id](void *s, AsyncClient *c, void *data, size_t len) {
+                _onTCPData(c, device_id, data, len);
+            }, 0);
+
+            client->onDisconnect([this, i](void *s, AsyncClient *c) {
+                _tcpClients[i]->free();
+                delete(_tcpClients[i]);
+                _tcpClients[i] = 0;
+                DEBUG_MSG_FAUXMO("[FAUXMO] Client #%d disconnected\n", i);
+            }, 0);
+
+            client->onError([i](void *s, AsyncClient *c, int8_t error) {
+                DEBUG_MSG_FAUXMO("[FAUXMO] Error %s (%d) on client #%d\n", c->errorToString(error), error, i);
+            }, 0);
+
+            client->onTimeout([i](void *s, AsyncClient *c, uint32_t time) {
+                DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client #%d at %i\n", i, time);
+                c->close();
+            }, 0);
+
+            DEBUG_MSG_FAUXMO("[FAUXMO] Client #%d connected\n", i);
+            return;
+
+        }
+    }
+
+    DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting - Too many connections\n");
+    client->stop();
 
 }
 
@@ -148,21 +219,10 @@ void fauxmoESP::addDevice(const char * device_name) {
     new_device.uuid = strdup(uuid);
 
     // TCP Server
-    new_device.server = new AsyncWebServer(_base_port + device_id);
-    new_device.server->on("/setup.xml", HTTP_GET, [this, device_id](AsyncWebServerRequest *request){
-        _handleSetup(request, device_id);
-    });
-    new_device.server->on("/upnp/control/basicevent1", HTTP_POST,
-        [](AsyncWebServerRequest *request) {
-            request->send(200);
-        },
-        NULL,
-        [this, device_id](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-            data[len] = 0;
-            _handleContent(request, device_id, (char *) data);
-        }
-    );
-
+    new_device.server = new AsyncServer(_base_port + device_id);
+    new_device.server->onClient([this, device_id](void *s, AsyncClient* c) {
+        _onTCPClient(c, device_id);
+    }, 0);
     new_device.server->begin();
 
     // Attach
@@ -180,7 +240,7 @@ void fauxmoESP::handle() {
         unsigned int remotePort = _udp.remotePort();
         uint8_t data[len];
         _udp.read(data, len);
-        _handleUDPPacket(remoteIP, remotePort, data, len);
+        _onUDPData(remoteIP, remotePort, data, len);
     }
 
     if (_roundsLeft > 0) {
