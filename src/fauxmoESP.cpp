@@ -176,7 +176,8 @@ void fauxmoESP::_onTCPClient(AsyncClient *client, unsigned int device_id) {
 
             client->onDisconnect([this, i](void *s, AsyncClient *c) {
                 _tcpClients[i]->free();
-                delete(_tcpClients[i]);
+                _tcpClients[i] = NULL;
+                delete c;
                 DEBUG_MSG_FAUXMO("[FAUXMO] Client #%d disconnected\n", i);
             }, 0);
 
@@ -193,13 +194,15 @@ void fauxmoESP::_onTCPClient(AsyncClient *client, unsigned int device_id) {
             return;
 
         }
+
     }
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Rejecting - Too many connections\n");
     client->onDisconnect([](void *s, AsyncClient *c) {
-        delete(c);
+        c->free();
+        delete c;
     });
-    client->stop();
+    client->close(true);
 
 }
 
