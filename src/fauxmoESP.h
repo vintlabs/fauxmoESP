@@ -98,7 +98,9 @@ class fauxmoESP {
     public:
 
         fauxmoESP(unsigned int port = DEFAULT_TCP_BASE_PORT);
-        void addDevice(const char * device_name);
+        unsigned char addDevice(const char * device_name);
+        bool renameDevice(unsigned char id, const char * device_name);
+        char * getDeviceName(unsigned char id, char * buffer, size_t len);
         void onMessage(TStateFunction fn) { _callback = fn; }
         void enable(bool enable);
         void handle();

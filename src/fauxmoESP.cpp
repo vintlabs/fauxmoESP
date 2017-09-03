@@ -203,7 +203,7 @@ void fauxmoESP::_onTCPClient(AsyncClient *client, unsigned int device_id) {
 
 }
 
-void fauxmoESP::addDevice(const char * device_name) {
+unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     fauxmoesp_device_t new_device;
     unsigned int device_id = _devices.size();
@@ -226,8 +226,27 @@ void fauxmoESP::addDevice(const char * device_name) {
     // Attach
     _devices.push_back(new_device);
 
-    DEBUG_MSG_FAUXMO("[FAUXMO] Device '%s' added (#%d)\n", device_name, device_id);
+    DEBUG_MSG_FAUXMO("[FAUXMO] Device '%s' added as #%d\n", device_name, device_id);
 
+    return device_id;
+
+}
+
+bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
+    if (0 <= id && id <= _devices.size()) {
+        delete _devices[id].name;
+        _devices[id].name = strdup(device_name);
+        DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d renamed to '%s'\n", id, device_name);
+        return true;
+    }
+    return false;
+}
+
+char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len) {
+    if (0 <= id && id <= _devices.size()) {
+        strncpy(device_name, _devices[id].name, len);
+    }
+    return device_name;
 }
 
 void fauxmoESP::handle() {

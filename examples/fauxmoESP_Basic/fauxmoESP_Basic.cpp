@@ -52,10 +52,10 @@ void setup() {
     fauxmo.enable(true);
 
     // Add virtual devices
-    fauxmo.addDevice("light one");
-    fauxmo.addDevice("light two");
-    fauxmo.addDevice("light three");
-    fauxmo.addDevice("light four");
+    unsigned char device_1 = fauxmo.addDevice("light one");
+    unsigned char device_2 = fauxmo.addDevice("light two");
+    unsigned char device_3 = fauxmo.addDevice("light three");
+    unsigned char device_4 = fauxmo.addDevice("light four");
 
     // fauxmoESP 2.0.0 has changed the callback signature to add the device_id, this WARRANTY
     // it's easier to match devices to action without having to compare strings.
@@ -63,6 +63,8 @@ void setup() {
         Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
         digitalWrite(LED, !state);
     });
+
+    fauxmo.renameDevice(device_2, "light five");
 
 }
 
