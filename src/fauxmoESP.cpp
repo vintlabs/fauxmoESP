@@ -30,6 +30,10 @@ THE SOFTWARE.
 #include <ESP8266WiFi.h>
 #include "fauxmoESP.h"
 
+// -----------------------------------------------------------------------------
+// UDP
+// -----------------------------------------------------------------------------
+
 void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
 
     fauxmoesp_device_t device = _devices[device_id];
@@ -39,13 +43,17 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
     IPAddress ip = WiFi.localIP();
     sprintf(buffer, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 
-    char response[strlen(UDP_TEMPLATE) + 40];
-    sprintf_P(response, UDP_TEMPLATE,
+    char response[strlen(UDP_TEMPLATE) + 128];
+    snprintf_P(response, sizeof(response), UDP_TEMPLATE,
         buffer,
         _base_port + _current,
         device.uuid,
-        device.uuid
+        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_DEVICE_PATTERN_2 : UDP_DEVICE_PATTERN_3,
+        device.uuid,
+        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_DEVICE_PATTERN_2 : UDP_DEVICE_PATTERN_3
     );
+
+    Serial.println(response);
 
     _udp.beginPacket(_remoteIP, _remotePort);
     _udp.write(response);
@@ -80,7 +88,12 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
     p[len] = 0;
 
     if (strstr(p, UDP_SEARCH_PATTERN) == (char *) data) {
-        if (strstr(p, UDP_DEVICE_PATTERN) != NULL) {
+        _udpPattern = 0;
+        if (strstr(p, UDP_DEVICE_PATTERN_1) != NULL) _udpPattern = 1;
+        if (strstr(p, UDP_DEVICE_PATTERN_2) != NULL) _udpPattern = 2;
+        if (strstr(p, UDP_DEVICE_PATTERN_3) != NULL) _udpPattern = 3;
+        if (strstr(p, UDP_ROOT_DEVICE) != NULL) _udpPattern = 3;
+        if (_udpPattern) {
 
             #ifdef DEBUG_FAUXMO
                 char buffer[16];
@@ -104,7 +117,14 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
 
 }
 
-void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id) {
+// -----------------------------------------------------------------------------
+// TCP
+// -----------------------------------------------------------------------------
+
+void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
+
+    (void) data;
+    (void) len;
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /setup.xml\n", device_id);
     _devices[device_id].hit = true;
@@ -121,7 +141,43 @@ void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id) {
 
 }
 
-void fauxmoESP::_handleContent(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
+void fauxmoESP::_handleEventService(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
+
+    (void) data;
+    (void) len;
+
+    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /eventservice.xml\n", device_id);
+
+    char response[strlen_P(EVENTSERVICE_TEMPLATE)];
+    sprintf_P(response, EVENTSERVICE_TEMPLATE);
+
+    char headers[strlen_P(HEADERS) + 10];
+    sprintf_P(headers, HEADERS, strlen(response));
+
+    client->write(headers, strlen(headers));
+    client->write(response, strlen(response));
+
+}
+
+void fauxmoESP::_handleMetaInfoService(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
+
+    (void) data;
+    (void) len;
+
+    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /metainfoservice.xml\n", device_id);
+
+    char response[strlen_P(EMPTYSERVICE_TEMPLATE)];
+    sprintf_P(response, EMPTYSERVICE_TEMPLATE);
+
+    char headers[strlen_P(HEADERS) + 10];
+    sprintf_P(headers, HEADERS, strlen(response));
+
+    client->write(headers, strlen(headers));
+    client->write(response, strlen(response));
+
+}
+
+void fauxmoESP::_handleControl(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
 
     char content[len+1];
     memcpy(content, data, len);
@@ -129,17 +185,21 @@ void fauxmoESP::_handleContent(AsyncClient *client, unsigned int device_id, void
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
     fauxmoesp_device_t device = _devices[device_id];
 
+    // setters
     if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
         if (_callback) _callback(device_id, device.name, false);
-    }
-
-    if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
+    } else if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
         if (_callback) _callback(device_id, device.name, true);
     }
 
+    char response[strlen_P(QUERY_TEMPLATE)];
+    sprintf_P(response, QUERY_TEMPLATE, device.state ? 1 : 0);
+
     char headers[strlen_P(HEADERS) + 10];
-    sprintf_P(headers, HEADERS, 0);
+    sprintf_P(headers, HEADERS, strlen(response));
+
     client->write(headers, strlen(headers));
+    client->write(response, strlen(response));
 
 }
 
@@ -147,14 +207,42 @@ void fauxmoESP::_onTCPData(AsyncClient *client, unsigned int device_id, void *da
 
     if (!_enabled) return;
 
-    char setup[] = {"GET /setup.xml HTTP/1.1"};
-    if (memcmp(data, setup, strlen(setup)-1) == 0) {
-        _handleSetup(client, device_id);
+    /*
+    char * p = (char *) data;
+    p[len] = 0;
+    Serial.print(p);
+    */
+
+    {
+        char match[] = {"GET /setup.xml HTTP/1.1"};
+        if (memcmp(data, match, strlen(match)-1) == 0) {
+            _handleSetup(client, device_id, data, len);
+            return;
+        }
     }
 
-    char event[] = {"POST /upnp/control/basicevent1 HTTP/1.1"};
-    if (memcmp(data, event, strlen(event)-1) == 0) {
-        _handleContent(client, device_id, data, len);
+    {
+        char match[] = {"GET /eventservice.xml HTTP/1.1"};
+        if (memcmp(data, match, strlen(match)-1) == 0) {
+            _handleEventService(client, device_id, data, len);
+            return;
+        }
+    }
+
+    {
+        char match[] = {"GET /metainfoservice.xml HTTP/1.1"};
+        if (memcmp(data, match, strlen(match)-1) == 0) {
+            _handleMetaInfoService(client, device_id, data, len);
+            return;
+        }
+    }
+
+    {
+        char match[] = {"POST /upnp/control/basicevent1 HTTP/1.1"};
+        if (memcmp(data, match, strlen(match)-1) == 0) {
+            _handleControl(client, device_id, data, len);
+            return;
+        }
     }
 
 }
@@ -206,6 +294,10 @@ void fauxmoESP::_onTCPClient(AsyncClient *client, unsigned int device_id) {
 
 }
 
+// -----------------------------------------------------------------------------
+// Public API
+// -----------------------------------------------------------------------------
+
 unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     fauxmoesp_device_t new_device;
@@ -250,6 +342,12 @@ char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len
         strncpy(device_name, _devices[id].name, len);
     }
     return device_name;
+}
+
+void fauxmoESP::setState(unsigned char id, bool state) {
+    if (0 <= id && id <= _devices.size()) {
+        _devices[id].state = state;
+    }
 }
 
 void fauxmoESP::handle() {
