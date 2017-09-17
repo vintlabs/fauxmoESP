@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Remove dependency on ESPAsyncWebServer
 
+### Added
+- Option to rename devices
+
 ## [2.1.1] 2017-08-25
 ### Fixed
 - Call UDP beginMulticast on onStationModeGotIP

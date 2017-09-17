@@ -58,7 +58,7 @@ void setup() {
 }
 
 void loop() {
-    fauxmoESP.handle();
+    fauxmo.handle();
 }
 
 ```
