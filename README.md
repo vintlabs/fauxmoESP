@@ -6,7 +6,7 @@ This is a library for ESP8266-based devices that emulates a Belkin WeMo device a
 
 This library is a port of Maker Musings' [Fauxmo Python library][6].
 
-**Current Version is 2.2.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
+**Current Version is 2.2.1**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
 
 ## Dependencies
 

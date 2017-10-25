@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.1] 2017-10-25
+### Fixed
+- Only change state if request is a SetBinaryState action
+
 ## [2.2.0] 2017-09-01
 ### Fixed
 - Remove dependency on ESPAsyncWebServer
