@@ -129,12 +129,16 @@ void fauxmoESP::_handleContent(AsyncClient *client, unsigned int device_id, void
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
     fauxmoesp_device_t device = _devices[device_id];
 
-    if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
-        if (_callback) _callback(device_id, device.name, false);
-    }
+    if (strstr(content, "SetBinaryState") != NULL) {
 
-    if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
-        if (_callback) _callback(device_id, device.name, true);
+        if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
+            if (_callback) _callback(device_id, device.name, false);
+        }
+
+        if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
+            if (_callback) _callback(device_id, device.name, true);
+        }
+
     }
 
     char headers[strlen_P(HEADERS) + 10];
@@ -146,6 +150,10 @@ void fauxmoESP::_handleContent(AsyncClient *client, unsigned int device_id, void
 void fauxmoESP::_onTCPData(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
 
     if (!_enabled) return;
+
+    char * p = (char *) data;
+    p[len] = 0;
+    DEBUG_MSG_FAUXMO("%s\n", p);
 
     char setup[] = {"GET /setup.xml HTTP/1.1"};
     if (memcmp(data, setup, strlen(setup)-1) == 0) {
