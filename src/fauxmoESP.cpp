@@ -185,11 +185,16 @@ void fauxmoESP::_handleControl(AsyncClient *client, unsigned int device_id, void
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
     fauxmoesp_device_t device = _devices[device_id];
 
-    // setters
-    if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
-        if (_callback) _callback(device_id, device.name, false);
-    } else if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
-        if (_callback) _callback(device_id, device.name, true);
+    if (strstr(content, "SetBinaryState") != NULL) {
+
+        if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
+            if (_callback) _callback(device_id, device.name, false);
+        }
+
+        if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
+            if (_callback) _callback(device_id, device.name, true);
+        }
+
     }
 
     char response[strlen_P(QUERY_TEMPLATE)];
