@@ -10,7 +10,7 @@
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
-    "platforms": ["espressif8266", "espressif8266_stage"]
+    "platforms": ["espressif8266", "espressif8266_stage"],
     "dependencies": [
         { "name": "ESPAsyncTCP" }
     ],
