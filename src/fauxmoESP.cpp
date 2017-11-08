@@ -179,26 +179,36 @@ void fauxmoESP::_handleMetaInfoService(AsyncClient *client, unsigned int device_
 
 void fauxmoESP::_handleControl(AsyncClient *client, unsigned int device_id, void *data, size_t len) {
 
+    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
+
     char content[len+1];
     memcpy(content, data, len);
-
-    DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /upnp/control/basicevent1\n", device_id);
     fauxmoesp_device_t device = _devices[device_id];
+
+    // The default template is the one for GetBinaryState queries
+    const char * response_template = GETSTATE_TEMPLATE;
 
     if (strstr(content, "SetBinaryState") != NULL) {
 
         if (strstr(content, "<BinaryState>0</BinaryState>") != NULL) {
-            if (_callback) _callback(device_id, device.name, false);
+            if (_setCallback) _setCallback(device_id, device.name, false);
         }
 
         if (strstr(content, "<BinaryState>1</BinaryState>") != NULL) {
-            if (_callback) _callback(device_id, device.name, true);
+            if (_setCallback) _setCallback(device_id, device.name, true);
         }
+
+        // Use a specific response template for SetBinaryState action
+        response_template = SETSTATE_TEMPLATE;
 
     }
 
-    char response[strlen_P(QUERY_TEMPLATE)];
-    sprintf_P(response, QUERY_TEMPLATE, device.state ? 1 : 0);
+    // Update current state
+    if (_getCallback) device.state = _getCallback(device_id, device.name);
+
+    // Send response
+    char response[strlen_P(response_template)];
+    sprintf_P(response, response_template, device.state ? 1 : 0);
 
     char headers[strlen_P(HEADERS) + 10];
     sprintf_P(headers, HEADERS, strlen(response));
@@ -334,7 +344,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
 bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
     if (0 <= id && id <= _devices.size()) {
-        delete _devices[id].name;
+        free(_devices[id].name);
         _devices[id].name = strdup(device_name);
         DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d renamed to '%s'\n", id, device_name);
         return true;

@@ -116,15 +116,25 @@ const char EMPTYSERVICE_TEMPLATE[] PROGMEM =
         "<serviceStateTable></serviceStateTable>"
     "</scpd>";
 
-const char QUERY_TEMPLATE[] PROGMEM =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
-	"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n"
-    	"<s:Body>\r\n"
-        	"<u:SetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\">\r\n"
-        	   "<BinaryState>%d</BinaryState>\r\n"
-        	"</u:SetBinaryState>\r\n"
-    	"</s:Body>\r\n"
-	"</s:Envelope>\r\n";
+const char SETSTATE_TEMPLATE[] PROGMEM =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+    	"<s:Body>"
+        	"<u:SetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\">"
+        	   "<BinaryState>%d</BinaryState>"
+        	"</u:SetBinaryState>"
+    	"</s:Body>"
+	"</s:Envelope>";
+
+const char GETSTATE_TEMPLATE[] PROGMEM =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+    "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+        "<s:Body>"
+            "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">"
+                "<BinaryState>%d</BinaryState>"
+            "</u:GetBinaryStateResponse>"
+        "</s:Body>"
+    "</s:Envelope>";
 
 const char HEADERS[] PROGMEM =
     "HTTP/1.1 200 OK\r\n"

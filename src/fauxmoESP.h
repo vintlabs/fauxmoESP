@@ -55,7 +55,8 @@ THE SOFTWARE.
 #include <vector>
 #include <WeMo.h>
 
-typedef std::function<void(unsigned char, const char *, bool)> TStateFunction;
+typedef std::function<void(unsigned char, const char *, bool)> TSetStateCallback;
+typedef std::function<bool(unsigned char, const char *)> TGetStateCallback;
 
 typedef struct {
     char * name;
@@ -70,13 +71,18 @@ class fauxmoESP {
     public:
 
         fauxmoESP(unsigned int port = DEFAULT_TCP_BASE_PORT);
+
         unsigned char addDevice(const char * device_name);
-        void setState(unsigned char id, bool state);
         bool renameDevice(unsigned char id, const char * device_name);
         char * getDeviceName(unsigned char id, char * buffer, size_t len);
-        void onMessage(TStateFunction fn) { _callback = fn; }
+        void onSetState(TSetStateCallback fn) { _setCallback = fn; }
+        void onGetState(TGetStateCallback fn) { _getCallback = fn; }
         void enable(bool enable);
         void handle();
+
+        // backwards compatibility DEPRECATED
+        void onMessage(TSetStateCallback fn) { onSetState(fn); }
+        void setState(unsigned char id, bool state);
 
     private:
 
@@ -86,7 +92,8 @@ class fauxmoESP {
         WiFiEventHandler _handler;
         WiFiUDP _udp;
         AsyncClient * _tcpClients[TCP_MAX_CLIENTS];
-        TStateFunction _callback = NULL;
+        TSetStateCallback _setCallback = NULL;
+        TGetStateCallback _getCallback = NULL;
 
         unsigned int _roundsLeft = 0;
         unsigned int _current = 0;

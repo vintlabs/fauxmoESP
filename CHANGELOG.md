@@ -3,6 +3,14 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.0] 2017-11-08
+### Fixed
+- Answer correctly to GetBinaryState queries (thanks to John McC)
+
+### Deprecated
+- Use onSetState callback instead of onMessage callback
+- Use onGetState callback instead of setState method
+
 ## [2.2.1] 2017-10-25
 ### Fixed
 - Only change state if request is a SetBinaryState action

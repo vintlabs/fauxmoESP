@@ -58,10 +58,14 @@ void setup() {
 
     // fauxmoESP 2.0.0 has changed the callback signature to add the device_id, this WARRANTY
     // it's easier to match devices to action without having to compare strings.
-    fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state) {
         Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
         digitalWrite(LED, !state);
-        fauxmo.setState(device_id, state);
+    });
+
+    // Callback to retrieve current state (for GetBinaryState queries)
+    fauxmo.onGetState([](unsigned char device_id, const char * device_name) {
+        return digitalRead(LED) == HIGH;
     });
 
 }
@@ -75,7 +79,6 @@ void loop() {
     // But, since it's not "async" anymore we have to manually poll for UDP
     // packets
     fauxmo.handle();
-
 
     static unsigned long last = millis();
     if (millis() - last > 5000) {
