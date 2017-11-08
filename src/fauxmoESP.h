@@ -49,6 +49,7 @@ THE SOFTWARE.
 #endif
 
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #include <WiFiUdp.h>
 #include <functional>
