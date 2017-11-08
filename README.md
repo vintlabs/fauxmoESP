@@ -6,7 +6,7 @@ This is a library for ESP8266-based devices that emulates a Belkin WeMo device a
 
 This library is a port of Maker Musings' [Fauxmo Python library][6].
 
-**Current Version is 2.2.1**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
+**Current Version is 2.3.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
 
 ## Dependencies
 
@@ -51,8 +51,12 @@ void setup() {
     fauxmo.addDevice("light two");
     fauxmo.addDevice("light three");
     fauxmo.addDevice("light four");
-    fauxmo.onMessage([](unsigned char device_id, const char * device_name, bool state) {
+
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state) {
         Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
+    });
+    fauxmo.onGetState([](unsigned char device_id, const char * device_name) {
+        return true; // whatever the state of the device is
     });
 
 }
