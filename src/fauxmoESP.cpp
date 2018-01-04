@@ -56,9 +56,9 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
         buffer,
         _base_port + _current,
         device.uuid,
-        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_DEVICE_PATTERN_2 : UDP_DEVICE_PATTERN_3,
+        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_DEVICE_PATTERN_2 : _udpPattern == 3 ? UDP_DEVICE_PATTERN_3 : _udpPattern == 4 ? UDP_DEVICE_PATTERN_4 : _udpPattern == 5 ? UDP_DEVICE_PATTERN_5 : UDP_ROOT_DEVICE,
         device.uuid,
-        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_DEVICE_PATTERN_2 : UDP_DEVICE_PATTERN_3
+        _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_ROOT_DEVICE : _udpPattern == 3 ? UDP_ROOT_DEVICE : _udpPattern == 4 ? UDP_ROOT_DEVICE : _udpPattern == 5 ? UDP_ROOT_DEVICE : UDP_ROOT_DEVICE
     );
 
     Serial.println(response);
@@ -104,7 +104,9 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
         if (strstr(p, UDP_DEVICE_PATTERN_1) != NULL) _udpPattern = 1;
         if (strstr(p, UDP_DEVICE_PATTERN_2) != NULL) _udpPattern = 2;
         if (strstr(p, UDP_DEVICE_PATTERN_3) != NULL) _udpPattern = 3;
-        if (strstr(p, UDP_ROOT_DEVICE) != NULL) _udpPattern = 3;
+		if (strstr(p, UDP_DEVICE_PATTERN_4) != NULL) _udpPattern = 4; // ssdp:all
+		if (strstr(p, UDP_DEVICE_PATTERN_5) != NULL) _udpPattern = 5; // ssdpsearch:all
+        if (strstr(p, UDP_ROOT_DEVICE) != NULL) _udpPattern = 6;      // upnp:rootdevice
         if (_udpPattern) {
 
             #ifdef DEBUG_FAUXMO
@@ -142,8 +144,8 @@ void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id, void *
     _devices[device_id].hit = true;
     fauxmoesp_device_t device = _devices[device_id];
 
-    char response[strlen_P(SETUP_TEMPLATE) + strlen(device.name) + strlen(device.uuid)];
-    snprintf_P(response, sizeof(response), SETUP_TEMPLATE, device.name, device.uuid);
+    char response[strlen_P(SETUP_TEMPLATE) + strlen(device.name) + strlen(device.uuid) + strlen(device.serial)];
+    snprintf_P(response, sizeof(response), SETUP_TEMPLATE, device.name, device.uuid, device.serial);
 
     char headers[strlen_P(HEADERS) + 10];
     snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
@@ -178,8 +180,8 @@ void fauxmoESP::_handleMetaInfoService(AsyncClient *client, unsigned int device_
 
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /metainfoservice.xml\n", device_id);
 
-    char response[strlen_P(EMPTYSERVICE_TEMPLATE)];
-    snprintf_P(response, sizeof(response), EMPTYSERVICE_TEMPLATE);
+    char response[strlen_P(METAINFO_TEMPLATE)];
+    snprintf_P(response, sizeof(response), METAINFO_TEMPLATE);
 
     char headers[strlen_P(HEADERS) + 10];
     snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
@@ -333,14 +335,22 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     // Copy name
     new_device.name = strdup(device_name);
 
+    // Chip ID
+    #if defined(ESP32)
+        unsigned long chip_id = (uint32_t) ESP.getEfuseMac();
+    #else
+        unsigned long chip_id = ESP.getChipId();
+    #endif
+
     // Create UUID
     char uuid[15];
-	#if defined(ESP32)
-		snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), (uint32_t)ESP.getEfuseMac(), device_id); // "DEV" + CHIPID + DEV_ID
-	#else
-    	snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), ESP.getChipId(), device_id); // "DEV" + CHIPID + DEV_ID
-	#endif
+    snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), chip_id, device_id); // "DEV" + CHIPID + DEV_ID
     new_device.uuid = strdup(uuid);
+
+    // Create Serialnumber
+    char serial[15];
+    sprintf(serial, "221703K0%06X\0", chip_id); // "221703K0" + CHIPID
+    new_device.serial = strdup(serial);
 
     // TCP Server
     new_device.server = new AsyncServer(_base_port + device_id);

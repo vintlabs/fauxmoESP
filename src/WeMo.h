@@ -37,14 +37,15 @@ const char UDP_TEMPLATE[] PROGMEM =
     "OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n"
     "01-NLS: %s\r\n"
     "SERVER: Unspecified, UPnP/1.0, Unspecified\r\n"
-    "X-User-Agent: redsonic\r\n"
     "ST: %s\r\n"
-    "USN: uuid:Socket-1_0-%s::%s\r\n\r\n";
+    "USN: uuid:Socket-1_0-%s::"
+	"%s\r\n"									// %s = urn:Belkin:device:** (Echo Dot 2Gen, Echo 1Gen)  or  %s = upnp:rootdevice (Echo 2Gen, Echo Plus)
+	"X-User-Agent: redsonic\r\n"
+	"\r\n";
 
 const char SETUP_TEMPLATE[] PROGMEM =
     "<?xml version=\"1.0\"?>"
-    "<root>"
-        "<specVersion><major>1</major><minor>0</minor></specVersion>"
+    "<root xmlns=\"urn:Belkin:device-1-0\">"
         "<device>"
             "<deviceType>urn:Belkin:device:controllee:1</deviceType>"
             "<friendlyName>%s</friendlyName>"
@@ -52,6 +53,8 @@ const char SETUP_TEMPLATE[] PROGMEM =
             "<modelName>Socket</modelName>"
             "<modelNumber>1.0</modelNumber>"
             "<UDN>uuid:Socket-1_0-%s</UDN>"
+			"<serialNumber>%s</serialNumber>"
+			"<binaryState>0</binaryState>"
             "<serviceList>"
                 "<service>"
                     "<serviceType>urn:Belkin:service:basicevent:1</serviceType>"
@@ -69,12 +72,10 @@ const char SETUP_TEMPLATE[] PROGMEM =
                 "</service>"
             "</serviceList>"
         "</device>"
-    "</root>";
+    "</root>\r\n";
 
 const char EVENTSERVICE_TEMPLATE[] PROGMEM =
-    "<?xml version=\"1.0\"?>"
     "<scpd xmlns=\"urn:Belkin:service-1-0\">"
-        "<specVersion><major>1</major><minor>0</minor></specVersion>"
         "<actionList>"
             "<action>"
                 "<name>SetBinaryState</name>"
@@ -105,36 +106,56 @@ const char EVENTSERVICE_TEMPLATE[] PROGMEM =
                 "<dataType>Boolean</dataType>"
                 "<defaultValue>0</defaultValue>"
             "</stateVariable>"
+            "<stateVariable sendEvents=\"yes\">"
+                "<name>level</name>"
+                "<dataType>string</dataType>"
+                "<defaultValue>0</defaultValue>"
+            "</stateVariable>"
         "</serviceStateTable>"
-    "</scpd>";
+    "</scpd>\r\n"
+    "\r\n";	
 
-const char EMPTYSERVICE_TEMPLATE[] PROGMEM =
-    "<?xml version=\"1.0\"?>"
+const char METAINFO_TEMPLATE[] PROGMEM =
     "<scpd xmlns=\"urn:Belkin:service-1-0\">"
         "<specVersion><major>1</major><minor>0</minor></specVersion>"
-        "<actionList></actionList>"
-        "<serviceStateTable></serviceStateTable>"
-    "</scpd>";
+        "<actionList>"
+            "<action>"
+                "<name>GetMetaInfo</name>"
+                "<argumentList>"
+                        "<retval/>"
+                        "<name>GetMetaInfo</name>"
+                        "<relatedStateVariable>MetaInfo</relatedStateVariable>"
+                        "<direction>in</direction>"
+                "</argumentList>"
+            "</action>"
+        "</actionList>"
+        "<serviceStateTable>"
+            "<stateVariable sendEvents=\"yes\">"
+                "<name>MetaInfo</name>"
+                "<dataType>string</dataType>"
+                "<defaultValue>0</defaultValue>"
+            "</stateVariable>"
+        "</serviceStateTable>"
+    "</scpd>\r\n"
+    "\r\n";	
 
 const char SETSTATE_TEMPLATE[] PROGMEM =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
     "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
     	"<s:Body>"
         	"<u:SetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\">"
         	   "<BinaryState>%d</BinaryState>"
         	"</u:SetBinaryState>"
     	"</s:Body>"
-	"</s:Envelope>";
+    "</s:Envelope>\r\n";
 
 const char GETSTATE_TEMPLATE[] PROGMEM =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
     "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
         "<s:Body>"
             "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">"
                 "<BinaryState>%d</BinaryState>"
             "</u:GetBinaryStateResponse>"
         "</s:Body>"
-    "</s:Envelope>";
+    "</s:Envelope>\r\n";
 
 const char HEADERS[] PROGMEM =
     "HTTP/1.1 200 OK\r\n"
