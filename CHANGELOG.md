@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.0] 2018-01-05
+### Fixed
+- Fixed examples for Arduino IDE (#34)
+
+### Added
+- Support for ESP32 (#28, thanks to Frank Hellmann)
+
 ## [2.3.0] 2017-11-08
 ### Fixed
 - Answer correctly to GetBinaryState queries (thanks to John McC)
