@@ -7,29 +7,29 @@ Attention:
 
 ## Origin
 
-This library is a port of Maker Musings' [Fauxmo Python library][6].
-ESP8266 Code by Xose Pérez <xose dot perez at gmail dot com>
-Additional ESP32 Code by Frank Hellmann <frank at vfx dot to>
-Support for v2 devices by Bibi Blocksberg
+* This library is a port of Maker Musings' [Fauxmo Python library][6].
+* ESP8266 Code by Xose Pérez <xose dot perez at gmail dot com>
+* Additional ESP32 Code by Frank Hellmann <frank at vfx dot to>
+* Support for v2 devices by Bibi Blocksberg
 
 **Current Version is 2.4.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
 
 ## Dependencies
 
 ESP8266:
- - This library uses [ESPAsyncTCP][3] library by [me-no-dev][5].
+* This library uses [ESPAsyncTCP][3] library by [me-no-dev][5]
 
 ESP32:
- - This library uses [AsyncTCP][4] library by [me-no-dev][5]
+* This library uses [AsyncTCP][4] library by [me-no-dev][5]
 
 ### PlatformIO
 
 If you are using PlatformIO (check the section bellow on how to compile it) you can install them by adding the dependencies to your ```platformio.ini``` file:
 
 ```
-
 lib_deps =
-    ESPAsyncTCP or AsyncTCP
+    ESPAsyncTCP
+    AsyncTCP
 ```
 
 ### Arduino IDE

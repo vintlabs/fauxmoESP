@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Support for ESP32 (#28, thanks to Frank Hellmann)
+- Preliminary support for Gen2 devices (thanks to Bibi Blocksberg)
 
 ## [2.3.0] 2017-11-08
 ### Fixed
