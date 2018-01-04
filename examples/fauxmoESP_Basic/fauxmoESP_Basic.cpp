@@ -1,5 +1,9 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#ifdef ESP32
+    #include <WiFi.h>
+#else
+    #include <ESP8266WiFi.h>
+#endif
 #include "fauxmoESP.h"
 #include "credentials.h"
 
@@ -56,8 +60,8 @@ void setup() {
 	//fauxmo.addDevice("switch two"); // You can add more devices
 	//fauxmo.addDevice("switch three");
 
-    // fauxmoESP 2.0.0 has changed the callback signature to add the device_id, this WARRANTY
-    // it's easier to match devices to action without having to compare strings.
+    // fauxmoESP 2.0.0 has changed the callback signature to add the device_id,
+    // this way it's easier to match devices to action without having to compare strings.
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state) {
         Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
         digitalWrite(LED, !state);

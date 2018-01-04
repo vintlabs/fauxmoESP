@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 2.2.0
+FAUXMO ESP 2.4.0
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -49,8 +49,17 @@ THE SOFTWARE.
 #endif
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
+
+#if defined(ESP32)
+	#include <WiFi.h>
+	#include <AsyncTCP.h>
+#elif defined(ESP8266)
+	#include <ESP8266WiFi.h>
+	#include <ESPAsyncTCP.h>
+#else
+	#error Platform not supported
+#endif
+
 #include <WiFiUdp.h>
 #include <functional>
 #include <vector>
@@ -90,7 +99,9 @@ class fauxmoESP {
         bool _enabled = true;
         unsigned int _base_port = DEFAULT_TCP_BASE_PORT;
         std::vector<fauxmoesp_device_t> _devices;
+		#ifdef ESP8266
         WiFiEventHandler _handler;
+		#endif
         WiFiUDP _udp;
         AsyncClient * _tcpClients[TCP_MAX_CLIENTS];
         TSetStateCallback _setCallback = NULL;

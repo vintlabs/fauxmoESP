@@ -27,7 +27,15 @@ THE SOFTWARE.
 */
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+
+#if defined(ESP32)
+	#include <WiFi.h>
+#elif defined(ESP8266)
+	#include <ESP8266WiFi.h>
+#else
+	#error Platform not supported
+#endif
+
 #include "fauxmoESP.h"
 
 // -----------------------------------------------------------------------------
@@ -41,7 +49,7 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
 
     char buffer[16];
     IPAddress ip = WiFi.localIP();
-    sprintf(buffer, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    snprintf_P(buffer, sizeof(buffer), PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
     char response[strlen(UDP_TEMPLATE) + 128];
     snprintf_P(response, sizeof(response), UDP_TEMPLATE,
@@ -56,7 +64,11 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
     Serial.println(response);
 
     _udp.beginPacket(_remoteIP, _remotePort);
-    _udp.write(response);
+	#if defined(ESP32)
+	    _udp.printf(response);
+	#else
+	    _udp.write(response);
+	#endif
     _udp.endPacket();
 
 }
@@ -97,7 +109,7 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
 
             #ifdef DEBUG_FAUXMO
                 char buffer[16];
-                sprintf(buffer, "%d.%d.%d.%d", remoteIP[0], remoteIP[1], remoteIP[2], remoteIP[3]);
+                snprintf_P(buffer, sizeof(buffer), PSTR("%d.%d.%d.%d"), remoteIP[0], remoteIP[1], remoteIP[2], remoteIP[3]);
                 DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s\n", buffer);
             #endif
 
@@ -130,11 +142,11 @@ void fauxmoESP::_handleSetup(AsyncClient *client, unsigned int device_id, void *
     _devices[device_id].hit = true;
     fauxmoesp_device_t device = _devices[device_id];
 
-    char response[strlen_P(SETUP_TEMPLATE) + 20];
-    sprintf_P(response, SETUP_TEMPLATE, device.name, device.uuid);
+    char response[strlen_P(SETUP_TEMPLATE) + strlen(device.name) + strlen(device.uuid)];
+    snprintf_P(response, sizeof(response), SETUP_TEMPLATE, device.name, device.uuid);
 
     char headers[strlen_P(HEADERS) + 10];
-    sprintf_P(headers, HEADERS, strlen(response));
+    snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
 
     client->write(headers, strlen(headers));
     client->write(response, strlen(response));
@@ -149,10 +161,10 @@ void fauxmoESP::_handleEventService(AsyncClient *client, unsigned int device_id,
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /eventservice.xml\n", device_id);
 
     char response[strlen_P(EVENTSERVICE_TEMPLATE)];
-    sprintf_P(response, EVENTSERVICE_TEMPLATE);
+    snprintf_P(response, sizeof(response), EVENTSERVICE_TEMPLATE);
 
     char headers[strlen_P(HEADERS) + 10];
-    sprintf_P(headers, HEADERS, strlen(response));
+    snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
 
     client->write(headers, strlen(headers));
     client->write(response, strlen(response));
@@ -167,10 +179,10 @@ void fauxmoESP::_handleMetaInfoService(AsyncClient *client, unsigned int device_
     DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d /metainfoservice.xml\n", device_id);
 
     char response[strlen_P(EMPTYSERVICE_TEMPLATE)];
-    sprintf_P(response, EMPTYSERVICE_TEMPLATE);
+    snprintf_P(response, sizeof(response), EMPTYSERVICE_TEMPLATE);
 
     char headers[strlen_P(HEADERS) + 10];
-    sprintf_P(headers, HEADERS, strlen(response));
+    snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
 
     client->write(headers, strlen(headers));
     client->write(response, strlen(response));
@@ -207,11 +219,11 @@ void fauxmoESP::_handleControl(AsyncClient *client, unsigned int device_id, void
     if (_getCallback) device.state = _getCallback(device_id, device.name);
 
     // Send response
-    char response[strlen_P(response_template)];
-    sprintf_P(response, response_template, device.state ? 1 : 0);
+    char response[strlen_P(response_template) + 10];
+    snprintf_P(response, sizeof(response), response_template, device.state ? 1 : 0);
 
     char headers[strlen_P(HEADERS) + 10];
-    sprintf_P(headers, HEADERS, strlen(response));
+    snprintf_P(headers, sizeof(headers), HEADERS, strlen(response));
 
     client->write(headers, strlen(headers));
     client->write(response, strlen(response));
@@ -323,7 +335,11 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     // Create UUID
     char uuid[15];
-    sprintf(uuid, "444556%06X%02X\0", ESP.getChipId(), device_id); // "DEV" + CHIPID + DEV_ID
+	#if defined(ESP32)
+		snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), (uint32_t)ESP.getEfuseMac(), device_id); // "DEV" + CHIPID + DEV_ID
+	#else
+    	snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), ESP.getChipId(), device_id); // "DEV" + CHIPID + DEV_ID
+	#endif
     new_device.uuid = strdup(uuid);
 
     // TCP Server
@@ -388,16 +404,21 @@ void fauxmoESP::handle() {
 void fauxmoESP::enable(bool enable) {
     DEBUG_MSG_FAUXMO("[FAUXMO] %s\n", enable ? "Enabled" : "Disabled");
     _enabled = enable;
+	#ifdef ESP32
+    	_udp.beginMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+	#endif
 }
 
 fauxmoESP::fauxmoESP(unsigned int port) {
 
     _base_port = port;
 
-    // Start UDP server on STA connection
-    _handler = WiFi.onStationModeGotIP([this](WiFiEventStationModeGotIP ipInfo) {
-        _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
-        DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
-    });
+	#ifdef ESP8266
+		// Start UDP server on STA connection
+		_handler = WiFi.onStationModeGotIP([this](WiFiEventStationModeGotIP ipInfo) {
+		    _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+		    DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
+		});
+	#endif
 
 }
