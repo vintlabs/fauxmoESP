@@ -69,7 +69,7 @@ void setup() {
 
     // Callback to retrieve current state (for GetBinaryState queries)
     fauxmo.onGetState([](unsigned char device_id, const char * device_name) {
-        return digitalRead(LED) == HIGH;
+        return !digitalRead(LED);
     });
 
 }
