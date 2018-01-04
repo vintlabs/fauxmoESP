@@ -24,6 +24,6 @@
         "maintainer": true
     },
     "examples": [
-        "examples/*/src/*.cpp"
+        "examples/*/src/*.ino"
     ]
 }
