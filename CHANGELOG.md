@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.1] 2018-01-10
+### Fixed
+- Fixed dependency issue in PlatformIO (the hard way)
+
 ## [2.4.0] 2018-01-05
 ### Fixed
 - Fixed examples for Arduino IDE (#34)

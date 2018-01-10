@@ -6,17 +6,11 @@
         "type": "git",
         "url": "https://bitbucket.org/xoseperez/fauxmoesp.git"
     },
-    "version": "2.4.0",
+    "version": "2.4.1",
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
-    "dependencies": [
-        {
-            "name": "ESPAsyncTCP",
-            "name": "AsyncTCP"
-        }
-    ],
     "authors": {
         "name": "Xose Perez",
         "email": "xose.perez@gmail.com",

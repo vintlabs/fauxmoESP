@@ -11,7 +11,7 @@ This is a library for ESP8266/ESP32-based devices that emulates a Belkin WeMo de
 * Additional ESP32 Code by Frank Hellmann <frank at vfx dot to>
 * Support for v2 devices by Bibi Blocksberg
 
-**Current Version is 2.4.0**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
+**Current Version is 2.4.1**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
 
 **Note about Gen2 devices**, the preliminary support in version 2.4.0 has not been tested in depth (not by me at least). Original author (Bibi Blocksberg) has reported it is working only when compiled against **Arduino Core 2.3.0 for ESP8266**. Latest stable version of Arduino Core for ESP8266 is 2.4.0 and it has been reported as NOT WORKING with second generation devices like the Echo Plus. Also, it has not been tested with ESP32 devices. Please read issue #39 and linked issues before reporting new info about the subject.
 
