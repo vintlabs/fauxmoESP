@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 2.4.0
+FAUXMO ESP 2.4.2
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -60,8 +60,6 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
         device.uuid,
         _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_ROOT_DEVICE : _udpPattern == 3 ? UDP_ROOT_DEVICE : _udpPattern == 4 ? UDP_ROOT_DEVICE : _udpPattern == 5 ? UDP_ROOT_DEVICE : UDP_ROOT_DEVICE
     );
-
-    Serial.println(response);
 
     _udp.beginPacket(_remoteIP, _remotePort);
 	#if defined(ESP32)

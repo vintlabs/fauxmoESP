@@ -6,7 +6,7 @@
         "type": "git",
         "url": "https://bitbucket.org/xoseperez/fauxmoesp.git"
     },
-    "version": "2.4.1",
+    "version": "2.4.2",
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
