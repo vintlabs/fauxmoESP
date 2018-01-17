@@ -116,6 +116,7 @@ class fauxmoESP {
         IPAddress _remoteIP;
         unsigned int _remotePort;
         unsigned int _udpPattern;
+        bool _discovering = false;
 
         void _sendUDPResponse(unsigned int device_id);
         void _nextUDPResponse();

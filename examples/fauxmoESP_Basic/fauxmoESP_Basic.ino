@@ -51,6 +51,7 @@ void setup() {
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
 
+    // You have to call enable(true) once you have a WiFi connection
     // You can enable or disable the library at any moment
     // Disabling it will prevent the devices from being discovered and switched
     fauxmo.enable(true);
@@ -59,6 +60,13 @@ void setup() {
     fauxmo.addDevice("switch one");
 	//fauxmo.addDevice("switch two"); // You can add more devices
 	//fauxmo.addDevice("switch three");
+    //fauxmo.addDevice("switch four");
+    //fauxmo.addDevice("switch five");
+    //fauxmo.addDevice("switch six");
+    //fauxmo.addDevice("switch seven");
+    //fauxmo.addDevice("switch eight");
+    //fauxmo.addDevice("switch nine");
+    //fauxmo.addDevice("switch ten");
 
     // fauxmoESP 2.0.0 has changed the callback signature to add the device_id,
     // this way it's easier to match devices to action without having to compare strings.

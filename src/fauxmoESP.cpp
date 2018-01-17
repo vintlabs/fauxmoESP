@@ -45,7 +45,6 @@ THE SOFTWARE.
 void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
 
     fauxmoesp_device_t device = _devices[device_id];
-    DEBUG_MSG_FAUXMO("[FAUXMO] UDP response for device #%d (%s)\n", _current, device.name);
 
     char buffer[16];
     IPAddress ip = WiFi.localIP();
@@ -61,6 +60,7 @@ void fauxmoESP::_sendUDPResponse(unsigned int device_id) {
         _udpPattern == 1 ? UDP_DEVICE_PATTERN_1 : _udpPattern == 2 ? UDP_ROOT_DEVICE : _udpPattern == 3 ? UDP_ROOT_DEVICE : _udpPattern == 4 ? UDP_ROOT_DEVICE : _udpPattern == 5 ? UDP_ROOT_DEVICE : UDP_ROOT_DEVICE
     );
 
+    DEBUG_MSG_FAUXMO("[FAUXMO] UDP response for device #%d (%s) sent to %s:%u\n", _current, device.name, _remoteIP.toString().c_str(), _remotePort);
     _udp.beginPacket(_remoteIP, _remotePort);
 	#if defined(ESP32)
 	    _udp.printf(response);
@@ -92,7 +92,7 @@ void fauxmoESP::_nextUDPResponse() {
 
 void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *data, size_t len) {
 
-    if (!_enabled) return;
+    if (_discovering) return;
 
     char * p = (char *) data;
     p[len] = 0;
@@ -107,11 +107,8 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
         if (strstr(p, UDP_ROOT_DEVICE) != NULL) _udpPattern = 6;      // upnp:rootdevice
         if (_udpPattern) {
 
-            #ifdef DEBUG_FAUXMO
-                char buffer[16];
-                snprintf_P(buffer, sizeof(buffer), PSTR("%d.%d.%d.%d"), remoteIP[0], remoteIP[1], remoteIP[2], remoteIP[3]);
-                DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s\n", buffer);
-            #endif
+            _discovering = true;
+            DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s:%u\n", remoteIP.toString().c_str(), remotePort);
 
             // Set hits to false
             for (unsigned int i = 0; i < _devices.size(); i++) {
@@ -342,7 +339,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     // Create UUID
     char uuid[15];
-    snprintf_P(uuid, sizeof(uuid), PSTR("444556%06X%02X\0"), chip_id, device_id); // "DEV" + CHIPID + DEV_ID
+    snprintf_P(uuid, sizeof(uuid), PSTR("%02X%06X46584D\0"), device_id, chip_id); // DEV_ID + CHIPID + "FXM"
     new_device.uuid = strdup(uuid);
 
     // Create Serialnumber
@@ -391,6 +388,8 @@ void fauxmoESP::setState(unsigned char id, bool state) {
 
 void fauxmoESP::handle() {
 
+    if (!_enabled) return;
+
     int len = _udp.parsePacket();
     if (len > 0) {
         IPAddress remoteIP = _udp.remoteIP();
@@ -405,28 +404,28 @@ void fauxmoESP::handle() {
             _lastTick = millis();
             _nextUDPResponse();
         }
+    } else {
+        _discovering = false;
     }
 
 }
 
 void fauxmoESP::enable(bool enable) {
+
     DEBUG_MSG_FAUXMO("[FAUXMO] %s\n", enable ? "Enabled" : "Disabled");
     _enabled = enable;
-	#ifdef ESP32
-    	_udp.beginMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
-	#endif
+
+    if (_enabled) {
+        #ifdef ESP32
+            _udp.beginMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+        #else
+            _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+        #endif
+        DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
+    }
+
 }
 
 fauxmoESP::fauxmoESP(unsigned int port) {
-
     _base_port = port;
-
-	#ifdef ESP8266
-		// Start UDP server on STA connection
-		_handler = WiFi.onStationModeGotIP([this](WiFiEventStationModeGotIP ipInfo) {
-		    _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
-		    DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
-		});
-	#endif
-
 }
