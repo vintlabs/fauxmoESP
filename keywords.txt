@@ -1,0 +1,41 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+TSetStateCallback       KEYWORD1
+TGetStateCallback       KEYWORD1
+
+#######################################
+# Classes (KEYWORD1)
+#######################################
+
+fauxmoESP               KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+addDevice               KEYWORD2
+renameDevice            KEYWORD2
+getDeviceName           KEYWORD2
+onSetState              KEYWORD2
+onGetState              KEYWORD2
+enable                  KEYWORD2
+handle                  KEYWORD2
+onMessage               KEYWORD2
+setState                KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+DEFAULT_TCP_BASE_PORT   LITERAL1
+UDP_MULTICAST_IP        LITERAL1
+UDP_MULTICAST_PORT      LITERAL1
+TCP_MAX_CLIENTS         LITERAL1
+UDP_RESPONSES_INTERVAL  LITERAL1
+UDP_RESPONSES_TRIES     LITERAL1

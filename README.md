@@ -4,6 +4,12 @@ Amazon Alexa support for ESP8266 and ESP32 devices.
 
 This is a library for ESP8266/ESP32-based devices that emulates a Belkin WeMo device and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
+[![version](https://img.shields.io/badge/version-2.4.3-brightgreen.svg)](CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+<br />
+[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=xose%2eperez%40gmail%2ecom&lc=US&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
+[![twitter](https://img.shields.io/twitter/follow/xoseperez.svg?style=social)](https://twitter.com/intent/follow?screen_name=xoseperez)
+
 ## Origin
 
 * This library is a port of Maker Musings' [Fauxmo Python library][6].
@@ -104,3 +110,27 @@ The strategies the library uses to improve discoverability are:
 [4]:https://github.com/me-no-dev/AsyncTCP
 [5]:https://github.com/me-no-dev
 [6]:https://github.com/makermusings/fauxmo
+
+## License
+
+Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
+
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

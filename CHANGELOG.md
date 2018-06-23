@@ -3,6 +3,9 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.3] 2018-06-23
+Dummy version to force PlatformIO parsing
+
 ## [2.4.2] 2018-01-14
 ### Fixed
 - Removed a Serial.print
