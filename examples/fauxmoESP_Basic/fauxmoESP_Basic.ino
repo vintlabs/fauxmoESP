@@ -55,29 +55,31 @@ void setup() {
     // You can enable or disable the library at any moment
     // Disabling it will prevent the devices from being discovered and switched
     fauxmo.enable(true);
+    fauxmo.enable(false);
+    fauxmo.enable(true);
+
+    // You can use different ways to invoke alexa to modify the devices state:
+    // "Alexa, turn light one on" ("light one" is the name of the first device below)
+    // "Alexa, turn on light one"
+    // "Alexa, set light one to fifty" (50 means 50% of brightness)
 
     // Add virtual devices
-    fauxmo.addDevice("switch one");
-	//fauxmo.addDevice("switch two"); // You can add more devices
-	//fauxmo.addDevice("switch three");
-    //fauxmo.addDevice("switch four");
-    //fauxmo.addDevice("switch five");
-    //fauxmo.addDevice("switch six");
-    //fauxmo.addDevice("switch seven");
-    //fauxmo.addDevice("switch eight");
-    //fauxmo.addDevice("switch nine");
-    //fauxmo.addDevice("switch ten");
+    fauxmo.addDevice("light 1");
+	fauxmo.addDevice("light 2");
+
+    // You can add more devices
+	//fauxmo.addDevice("light 3");
+    //fauxmo.addDevice("light 4");
+    //fauxmo.addDevice("light 5");
+    //fauxmo.addDevice("light 6");
+    //fauxmo.addDevice("light 7");
+    //fauxmo.addDevice("light 8");
 
     // fauxmoESP 2.0.0 has changed the callback signature to add the device_id,
     // this way it's easier to match devices to action without having to compare strings.
-    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state) {
-        Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+        Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
         digitalWrite(LED, !state);
-    });
-
-    // Callback to retrieve current state (for GetBinaryState queries)
-    fauxmo.onGetState([](unsigned char device_id, const char * device_name) {
-        return !digitalRead(LED);
     });
 
 }

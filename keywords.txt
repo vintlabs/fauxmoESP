@@ -22,8 +22,6 @@ onSetState              KEYWORD2
 onGetState              KEYWORD2
 enable                  KEYWORD2
 handle                  KEYWORD2
-onMessage               KEYWORD2
-setState                KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
@@ -33,9 +31,4 @@ setState                KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
-DEFAULT_TCP_BASE_PORT   LITERAL1
-UDP_MULTICAST_IP        LITERAL1
-UDP_MULTICAST_PORT      LITERAL1
 TCP_MAX_CLIENTS         LITERAL1
-UDP_RESPONSES_INTERVAL  LITERAL1
-UDP_RESPONSES_TRIES     LITERAL1

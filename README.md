@@ -2,26 +2,23 @@
 
 Amazon Alexa support for ESP8266 and ESP32 devices.
 
-This is a library for ESP8266/ESP32-based devices that emulates a Belkin WeMo device and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
+This is a library for ESP8266/ESP32-based devices that emulates Philips Hue lights and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
-[![version](https://img.shields.io/badge/version-2.4.3-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-3.0.0-brightgreen.svg)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 <br />
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=xose%2eperez%40gmail%2ecom&lc=US&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 [![twitter](https://img.shields.io/twitter/follow/xoseperez.svg?style=social)](https://twitter.com/intent/follow?screen_name=xoseperez)
 
-## Origin
+## History
 
-* This library is a port of Maker Musings' [Fauxmo Python library][6].
-* ESP8266 Code by Xose Pérez <xose dot perez at gmail dot com>
-* Additional ESP32 Code by Frank Hellmann <frank at vfx dot to>
-* Support for v2 devices by Bibi Blocksberg
+Before version 3.0.0, the library used a different protocol (emulating Belkin Wemo devices). The library was a port of Maker Musings' [Fauxmo Python library][6] to the ESP8266 platform. Support for ESP32 and Gen2 devices was added by Frank Hellmann <frank at vfx dot to> and Bibi Blocksberg respectively.
 
-**Current Version is 2.4.2**, this version shows some backwards incompatibilities with version 1.0.0. Check the examples to rewrite your code if you were using a previous version and read the [changelog](CHANGELOG.md).
-
-**Note about Gen2 devices**, the preliminary support in version 2.4.0 has not been tested in depth (not by me at least). Original author (Bibi Blocksberg) has reported it is working only when compiled against **Arduino Core 2.3.0 for ESP8266**. Latest stable version of Arduino Core for ESP8266 is 2.4.0 and it has been reported as NOT WORKING with second generation devices like the Echo Plus. Also, it has not been tested with ESP32 devices. Please read issue #39 and linked issues before reporting new info about the subject.
+Since version 3.0.0 the library uses a different approach and emulates Philips Hue lights instead. This allows for a simpler code and also support for numeric values (you can now say "Alexa, set light to 50"). This version has been inspired by the [node-red-contrib-alexa-local](https://github.com/originallyus/node-red-contrib-alexa-local) plugin by originallyus for NodeRED and the [ESPalexa](https://github.com/Aircoookie/Espalexa) library by Christian Schwinne.
 
 ## Dependencies
+
+Besides the libraries already included with the Arduino Core for ESP8266 or ESP32, these libraries are also required to use fauxmoESP:
 
 ESP8266:
 
@@ -73,11 +70,8 @@ void setup() {
     fauxmo.addDevice("light four");
     fauxmo.enable(true);
 
-    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state) {
-        Serial.printf("[MAIN] Device #%d (%s) state: %s\n", device_id, device_name, state ? "ON" : "OFF");
-    });
-    fauxmo.onGetState([](unsigned char device_id, const char * device_name) {
-        return true; // whatever the state of the device is
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+        Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
     });
 
 }
@@ -92,17 +86,9 @@ void loop() {
 
 Then run the "discover devices" option from your Alexa app or web (in the Smart Home section). A new device with the name you have configured should appear. Tell Alexa to switch it on or off and check your terminal ;)
 
-## Device discovery
+## Troubleshooting
 
-Device discovery can be incomplete when you have lots of devices defined. Since version 2.0.0 different strategies are used to maximize the chance of getting all of them discovered during the first round.
-
-Tests have been run with up to 16 devices with success but your experience might be different. If not all of them are discovered on the first run, execute the Discover Devices option again from your Alexa app or tell your Echo/Dot to do it. Once they pop up in your devices list (even if they are flagged as "Offline") they should work just fine.
-
-The strategies the library uses to improve discoverability are:
-
-* Space UDP responses to help Echo/Dot and the device itself to perform setup queries
-* Repeat UDP responses for devices not queried
-* Randomize UDP responses
+The `onGetState` method accepts a function (a callback) that will be called when a new message arrives. Try not to do many things inside the callback, it should return as fast as possible. Instead of adding logic here just save the data (device_id and state, for instance) and process it from your main loop.
 
 [1]:https://github.com/esp8266/Arduino
 [2]:http://docs.platformio.org/en/stable/platforms/espressif8266.html#using-arduino-framework-with-staging-version
