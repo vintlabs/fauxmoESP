@@ -3,7 +3,6 @@
 #######################################
 
 TSetStateCallback       KEYWORD1
-TGetStateCallback       KEYWORD1
 
 #######################################
 # Classes (KEYWORD1)
@@ -19,7 +18,6 @@ addDevice               KEYWORD2
 renameDevice            KEYWORD2
 getDeviceName           KEYWORD2
 onSetState              KEYWORD2
-onGetState              KEYWORD2
 enable                  KEYWORD2
 handle                  KEYWORD2
 
@@ -30,5 +28,3 @@ handle                  KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
-
-TCP_MAX_CLIENTS         LITERAL1
