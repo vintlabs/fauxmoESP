@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 2.4.3
+FAUXMO ESP 2.4.4
 
 Copyright (C) 2016 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -109,6 +109,9 @@ void fauxmoESP::_onUDPData(IPAddress remoteIP, unsigned int remotePort, void *da
 
             _discovering = true;
             DEBUG_MSG_FAUXMO("[FAUXMO] Search request from %s:%u\n", remoteIP.toString().c_str(), remotePort);
+
+            // Stop processing here if there are no devices defined
+            if (0 == _devices.size()) return;
 
             // Set hits to false
             for (unsigned int i = 0; i < _devices.size(); i++) {

@@ -6,7 +6,7 @@
         "type": "git",
         "url": "https://bitbucket.org/xoseperez/fauxmoESP"
     },
-    "version": "2.4.3",
+    "version": "2.4.4",
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",

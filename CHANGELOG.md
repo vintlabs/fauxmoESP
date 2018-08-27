@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.4] 2018-08-27
+### Fixed
+- Properly handle UDP messages when no devices defined
+
 ## [2.4.3] 2018-06-23
 Dummy version to force PlatformIO parsing
 
