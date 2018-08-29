@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.1] 2018.08-29
+### Fixed
+- Possible segmentation fault in getDeviceName
+
 ## [3.0.0] 2018-08-15
 ### Changed
 - Completely new paradigm, emulating Philips Hue API instead of Belkin Wemo API
