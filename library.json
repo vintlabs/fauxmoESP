@@ -11,6 +11,10 @@
     "exclude": "tests",
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
+    "dependencies": {
+        "ESPAsyncTCP": "1.2.0",
+        "AsyncTCP": "1.0.1"
+    },
     "authors": {
         "name": "Xose Perez",
         "email": "xose.perez@gmail.com",

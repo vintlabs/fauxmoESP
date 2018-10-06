@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 3.0.1
+FAUXMO ESP
 
 Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 

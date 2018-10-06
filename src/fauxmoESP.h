@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 3.0.1
+FAUXMO ESP
 
 Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -45,12 +45,12 @@ THE SOFTWARE.
 
 #include <Arduino.h>
 
-#if defined(ESP32)
-	#include <WiFi.h>
-	#include <AsyncTCP.h>
-#elif defined(ESP8266)
-	#include <ESP8266WiFi.h>
-	#include <ESPAsyncTCP.h>
+#if defined(ESP8266)
+    #include <ESP8266WiFi.h>
+    #include <ESPAsyncTCP.h>
+#elif defined(ESP32)
+    #include <WiFi.h>
+    #include <AsyncTCP.h>
 #else
 	#error Platform not supported
 #endif
