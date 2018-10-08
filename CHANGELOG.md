@@ -3,7 +3,14 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.1] 2018.08-29
+## [3.0.2] 2018-10-08
+### Fixed
+- Removed symlinks to allow Arduino track the library
+
+### Changed
+- Debug messages moved to PROGMEME
+
+## [3.0.1] 2018-08-29
 ### Fixed
 - Possible segmentation fault in getDeviceName
 
