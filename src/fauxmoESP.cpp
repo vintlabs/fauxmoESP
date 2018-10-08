@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 3.0.0
+FAUXMO ESP
 
 Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -52,8 +52,7 @@ void fauxmoESP::_sendUDPResponse() {
     );
 
 	#if DEBUG_FAUXMO_VERBOSE
-    	DEBUG_MSG_FAUXMO("[FAUXMO] UDP response sent to %s:%u\n", _udp.remoteIP().toString().c_str(), _udp.remotePort());
-		DEBUG_MSG_FAUXMO(response);
+    	DEBUG_MSG_FAUXMO("[FAUXMO] UDP response sent to %s:%u\n%s", _udp.remoteIP().toString().c_str(), _udp.remotePort(), response);
 	#endif
 
     _udp.beginPacket(_udp.remoteIP(), _udp.remotePort());
@@ -76,8 +75,7 @@ void fauxmoESP::_handleUDP() {
         data[len] = 0;
 
 		#if DEBUG_FAUXMO_VERBOSE
-			DEBUG_MSG_FAUXMO("[FAUXMO] UDP packet received\n");
-			DEBUG_MSG_FAUXMO((const char *) data);
+			DEBUG_MSG_FAUXMO("[FAUXMO] UDP packet received\n%s", (const char *) data);
 		#endif
 
         String request = (const char *) data;
@@ -105,10 +103,7 @@ void fauxmoESP::_sendTCPResponse(AsyncClient *client, const char * code, char * 
 	);
 
 	#if DEBUG_FAUXMO_VERBOSE
-		DEBUG_MSG_FAUXMO("[FAUXMO] Response:\n");
-		DEBUG_MSG_FAUXMO((const char *) headers);
-		DEBUG_MSG_FAUXMO((const char *) body);
-		DEBUG_MSG_FAUXMO("\n");
+		DEBUG_MSG_FAUXMO("[FAUXMO] Response:\n%s%s\n", headers, body);
 	#endif
 
 	client->write(headers);
@@ -266,9 +261,7 @@ void fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
 	#if DEBUG_FAUXMO_VERBOSE
     	char * p = (char *) data;
     	p[len] = 0;
-		DEBUG_MSG_FAUXMO("[FAUXMO] TCP request\n");
-    	DEBUG_MSG_FAUXMO(p);
-		DEBUG_MSG_FAUXMO("\n");
+		DEBUG_MSG_FAUXMO("[FAUXMO] TCP request\n%s\n", p);
 	#endif
 
     {
@@ -385,7 +378,7 @@ bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
 }
 
 char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len) {
-    if (0 <= id && id <= _devices.size()) {
+    if ((0 <= id) && (id <= _devices.size()) && (device_name != NULL)) {
         strncpy(device_name, _devices[id].name, len);
     }
     return device_name;
@@ -403,7 +396,11 @@ void fauxmoESP::enable(bool enable) {
 
 	if (enable == _enabled) return;
     _enabled = enable;
-	DEBUG_MSG_FAUXMO("[FAUXMO] %s\n", enable ? "Enabled" : "Disabled");
+	if (_enabled) {
+		DEBUG_MSG_FAUXMO("[FAUXMO] Enabled\n");
+	} else {
+		DEBUG_MSG_FAUXMO("[FAUXMO] Disabled\n");
+	}
 
     if (_enabled) {
 

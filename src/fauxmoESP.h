@@ -1,6 +1,6 @@
 /*
 
-FAUXMO ESP 3.0.0
+FAUXMO ESP
 
 Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 
@@ -34,7 +34,7 @@ THE SOFTWARE.
 #define TCP_PORT                1901
 
 #ifdef DEBUG_FAUXMO
-    #define DEBUG_MSG_FAUXMO(...) DEBUG_FAUXMO.printf( __VA_ARGS__ )
+    #define DEBUG_MSG_FAUXMO(fmt, ...) { static const char pfmt[] PROGMEM = fmt; DEBUG_FAUXMO.printf_P(pfmt, ## __VA_ARGS__); }
 #else
     #define DEBUG_MSG_FAUXMO(...)
 #endif
@@ -45,12 +45,12 @@ THE SOFTWARE.
 
 #include <Arduino.h>
 
-#if defined(ESP32)
-	#include <WiFi.h>
-	#include <AsyncTCP.h>
-#elif defined(ESP8266)
-	#include <ESP8266WiFi.h>
-	#include <ESPAsyncTCP.h>
+#if defined(ESP8266)
+    #include <ESP8266WiFi.h>
+    #include <ESPAsyncTCP.h>
+#elif defined(ESP32)
+    #include <WiFi.h>
+    #include <AsyncTCP.h>
 #else
 	#error Platform not supported
 #endif
