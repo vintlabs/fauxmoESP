@@ -169,7 +169,7 @@ void fauxmoESP::_onTCPList(AsyncClient *client, void *data, size_t len) {
 	// Get the index
 	int pos = request.indexOf("lights");
 	unsigned char id = request.substring(pos+7).toInt();
-
+	// This will hold the response string	
 	String response;
 
 	// Client is requesting all devices
@@ -188,7 +188,7 @@ void fauxmoESP::_onTCPList(AsyncClient *client, void *data, size_t len) {
 	}
 
 	_sendTCPResponse(client, "200 OK", (char *) response.c_str(), "application/json");
-
+	
 
 }
 
@@ -197,7 +197,7 @@ void fauxmoESP::_onTCPControl(AsyncClient *client, void *data, size_t len) {
 	char * p = (char *) data;
 	p[len] = 0;
 	String request = String(p);
-
+	// "devicetype" request
 	// "devicetype" request
 	if (request.indexOf("devicetype") > 0) {
 		DEBUG_MSG_FAUXMO("[FAUXMO] Handling devicetype request\n");
@@ -259,8 +259,8 @@ void fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
     if (!_enabled) return;
 
 	#if DEBUG_FAUXMO_VERBOSE
-    	char * p = (char *) data;
-    	p[len] = 0;
+	char * p = (char *) data;
+	p[len] = 0;
 		DEBUG_MSG_FAUXMO("[FAUXMO] TCP request\n%s\n", p);
 	#endif
 
@@ -273,7 +273,15 @@ void fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
     }
 
     {
-        char match[] = {"PUT /api/"};
+        char match[] = {"POST /api"};
+        if (memcmp(data, match, strlen(match)-1) == 0) {
+            _onTCPControl(client, data, len);
+            return;
+        }
+    }
+
+    {
+        char match[] = {"PUT /api"};
         if (memcmp(data, match, strlen(match)-1) == 0) {
             _onTCPControl(client, data, len);
             return;
@@ -281,12 +289,12 @@ void fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
     }
 
 	{
-        char match[] = {"GET /api/"};
+        char match[] = {"GET /api"};
         if (memcmp(data, match, strlen(match)-1) == 0) {
             _onTCPList(client, data, len);
             return;
-        }
-    }
+		}
+	}
 
 }
 
@@ -404,14 +412,14 @@ void fauxmoESP::enable(bool enable) {
 
     if (_enabled) {
 
-		// Start TCP server
+		// Start TCP server if internal
 		if (NULL == _server) {
-			_server = new AsyncServer(TCP_PORT);
-	    	_server->onClient([this](void *s, AsyncClient* c) {
-	        	_onTCPClient(c);
-	    	}, 0);
+		_server = new AsyncServer(TCP_PORT);
+			_server->onClient([this](void *s, AsyncClient* c) {
+				_onTCPClient(c);
+			}, 0);
 		}
-	    _server->begin();
+		_server->begin();
 
 		// UDP setup
 		#ifdef ESP32

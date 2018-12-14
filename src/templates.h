@@ -39,15 +39,20 @@ PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
     "{\"success\":{\"/lights/%d/state/bri\":%d}}"   // not needed?
 "]";
 
+// Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
 PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
     "\"type\":\"Extended Color Light\","
-    "\"swversion\":\"0.1\","
     "\"name\":\"%s\","
     "\"uniqueid\":\"%s-%d\","
-    "\"modelid\":\"LCT004\","
+    "\"modelid\":\"LCT007\","
     "\"state\":{"
-        "\"on\":%s,\"bri\":%d,\"xy\":[0,0],\"reachable\":true"
-    "}"
+        "\"on\":%s,\"bri\":%d,\"xy\":[0,0],\"reachable\": true"
+    "},"
+    "\"capabilities\":{"
+        "\"certified\":false,"
+        "\"streaming\":{\"renderer\":true,\"proxy\":false}"
+    "},"
+    "\"swversion\":\"5.105.0.21169\""
 "}";
 
 PROGMEM const char FAUXMO_DESCRIPTION_TEMPLATE[] =
@@ -67,22 +72,6 @@ PROGMEM const char FAUXMO_DESCRIPTION_TEMPLATE[] =
         "<serialNumber>%s</serialNumber>"
         "<UDN>uuid:2f402f80-da50-11e1-9b23-%s</UDN>"
         "<presentationURL>index.html</presentationURL>"
-        "<iconList>"
-            "<icon>"
-                "<mimetype>image/png</mimetype>"
-                "<height>48</height>"
-                "<width>48</width>"
-                "<depth>24</depth>"
-                "<url>hue_logo_0.png</url>"
-            "</icon>"
-            "<icon>"
-                "<mimetype>image/png</mimetype>"
-                "<height>120</height>"
-                "<width>120</width>"
-                "<depth>24</depth>"
-                "<url>hue_logo_3.png</url>"
-            "</icon>"
-        "</iconList>"
     "</device>"
 "</root>";
 

@@ -31,7 +31,7 @@ THE SOFTWARE.
 #define UDP_MULTICAST_IP        IPAddress(239,255,255,250)
 #define UDP_MULTICAST_PORT      1900
 #define TCP_MAX_CLIENTS         10
-#define TCP_PORT                1901
+#define TCP_PORT                80
 
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(fmt, ...) { static const char pfmt[] PROGMEM = fmt; DEBUG_FAUXMO.printf_P(pfmt, ## __VA_ARGS__); }
@@ -58,7 +58,7 @@ THE SOFTWARE.
 #include <WiFiUdp.h>
 #include <functional>
 #include <vector>
-#include <templates.h>
+#include "templates.h"
 
 typedef std::function<void(unsigned char, const char *, bool, unsigned char)> TSetStateCallback;
 

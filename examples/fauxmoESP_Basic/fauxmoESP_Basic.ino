@@ -63,8 +63,8 @@ void setup() {
     // "Alexa, set light one to fifty" (50 means 50% of brightness)
 
     // Add virtual devices
-    fauxmo.addDevice("light 1");
-	fauxmo.addDevice("light 2");
+    fauxmo.addDevice("kitchen");
+    fauxmo.addDevice("bathroom");
 
     // You can add more devices
 	//fauxmo.addDevice("light 3");
