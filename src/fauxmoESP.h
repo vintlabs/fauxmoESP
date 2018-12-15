@@ -28,10 +28,10 @@ THE SOFTWARE.
 
 #pragma once
 
-#define UDP_MULTICAST_IP        IPAddress(239,255,255,250)
-#define UDP_MULTICAST_PORT      1900
-#define TCP_MAX_CLIENTS         10
-#define TCP_PORT                80
+#define UDP_MULTICAST_IP            IPAddress(239,255,255,250)
+#define UDP_MULTICAST_PORT          1900
+#define TCP_MAX_CLIENTS             10
+#define TCP_PORT                    1901
 
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(fmt, ...) { static const char pfmt[] PROGMEM = fmt; DEBUG_FAUXMO.printf_P(pfmt, ## __VA_ARGS__); }
@@ -39,8 +39,12 @@ THE SOFTWARE.
     #define DEBUG_MSG_FAUXMO(...)
 #endif
 
-#ifndef DEBUG_FAUXMO_VERBOSE
-#define DEBUG_FAUXMO_VERBOSE    false
+#ifndef DEBUG_FAUXMO_VERBOSE_TCP
+#define DEBUG_FAUXMO_VERBOSE_TCP    false
+#endif
+
+#ifndef DEBUG_FAUXMO_VERBOSE_UDP
+#define DEBUG_FAUXMO_VERBOSE_UDP    false
 #endif
 
 #include <Arduino.h>
@@ -76,13 +80,18 @@ class fauxmoESP {
         bool renameDevice(unsigned char id, const char * device_name);
         char * getDeviceName(unsigned char id, char * buffer, size_t len);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
+        bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
+        void createServer(bool internal) { _internal = internal; }
+        void setPort(unsigned long tcp_port) { _tcp_port = tcp_port; }
         void handle();
 
     private:
 
         AsyncServer * _server;
         bool _enabled = true;
+        bool _internal = true;
+        unsigned int _tcp_port = TCP_PORT;
         std::vector<fauxmoesp_device_t> _devices;
 		#ifdef ESP8266
         WiFiEventHandler _handler;
@@ -98,10 +107,11 @@ class fauxmoESP {
         void _sendUDPResponse();
 
         void _onTCPClient(AsyncClient *client);
-        void _onTCPData(AsyncClient *client, void *data, size_t len);
-        void _onTCPDescription(AsyncClient *client, void *data, size_t len);
-        void _onTCPList(AsyncClient *client, void *data, size_t len);
-        void _onTCPControl(AsyncClient *client, void *data, size_t len);
+        bool _onTCPData(AsyncClient *client, void *data, size_t len);
+        bool _onTCPRequest(AsyncClient *client, bool isGet, String url, String body);
+        bool _onTCPDescription(AsyncClient *client, String url, String body);
+        bool _onTCPList(AsyncClient *client, String url, String body);
+        bool _onTCPControl(AsyncClient *client, String url, String body);
         void _sendTCPResponse(AsyncClient *client, const char * code, char * body, const char * mime);
 
 };

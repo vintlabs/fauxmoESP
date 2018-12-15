@@ -1,9 +1,10 @@
 #include <Arduino.h>
-#ifdef ESP32
-    #include <WiFi.h>
-#else
+#if defined(ESP8266)
     #include <ESP8266WiFi.h>
+#elif defined(ESP32)
+    #include <WiFi.h>
 #endif
+#include <ESPAsyncWebServer.h>
 #include "fauxmoESP.h"
 #include "credentials.h"
 
@@ -11,6 +12,8 @@
 #define LED                             2
 
 fauxmoESP fauxmo;
+AsyncWebServer server(80);
+
 // -----------------------------------------------------------------------------
 // Wifi
 // -----------------------------------------------------------------------------
@@ -50,10 +53,25 @@ void setup() {
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH);
 
-    // By default, fauxmoESP creates it's own webserver on the defined port
+    // Web server
+    server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+    });
+    server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), String((char *)data))) return;
+        // Handle any other body request here...
+    });
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        String body = (request->hasParam("body", true)) ? request->getParam("body", true)->value() : String();
+        if (fauxmo.process(request->client(), request->method() == HTTP_GET, request->url(), body)) return;
+        // Handle not found request here...
+    });
+    server.begin();
+
+    // Set fauxmoESP to not create an internal TCP server and redirect requests to the server on the defined port
     // The TCP port must be 80 for gen3 devices (default is 1901)
     // This has to be done before the call to enable()
-    fauxmo.createServer(true); // not needed, this is the default value
+    fauxmo.createServer(false);
     fauxmo.setPort(80); // This is required for gen3 devices
 
     // You have to call enable(true) once you have a WiFi connection

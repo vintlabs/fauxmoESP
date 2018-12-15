@@ -47,12 +47,12 @@ void fauxmoESP::_sendUDPResponse() {
         response, sizeof(response),
         FAUXMO_UDP_RESPONSE_TEMPLATE,
         ip[0], ip[1], ip[2], ip[3],
-		TCP_PORT,
+		_tcp_port,
         mac.c_str(), mac.c_str()
     );
 
-	#if DEBUG_FAUXMO_VERBOSE
-    	DEBUG_MSG_FAUXMO("[FAUXMO] UDP response sent to %s:%u\n%s", _udp.remoteIP().toString().c_str(), _udp.remotePort(), response);
+	#if DEBUG_FAUXMO_VERBOSE_UDP
+    	DEBUG_MSG_FAUXMO("[FAUXMO] UDP response sent to %s:%d\n%s", _udp.remoteIP().toString().c_str(), _udp.remotePort(), response);
 	#endif
 
     _udp.beginPacket(_udp.remoteIP(), _udp.remotePort());
@@ -74,7 +74,7 @@ void fauxmoESP::_handleUDP() {
         _udp.read(data, len);
         data[len] = 0;
 
-		#if DEBUG_FAUXMO_VERBOSE
+		#if DEBUG_FAUXMO_VERBOSE_UDP
 			DEBUG_MSG_FAUXMO("[FAUXMO] UDP packet received\n%s", (const char *) data);
 		#endif
 
@@ -102,7 +102,7 @@ void fauxmoESP::_sendTCPResponse(AsyncClient *client, const char * code, char * 
 		code, mime, strlen(body)
 	);
 
-	#if DEBUG_FAUXMO_VERBOSE
+	#if DEBUG_FAUXMO_VERBOSE_TCP
 		DEBUG_MSG_FAUXMO("[FAUXMO] Response:\n%s%s\n", headers, body);
 	#endif
 
@@ -133,10 +133,10 @@ String fauxmoESP::_deviceJson(unsigned char id) {
 
 }
 
-void fauxmoESP::_onTCPDescription(AsyncClient *client, void *data, size_t len) {
+bool fauxmoESP::_onTCPDescription(AsyncClient *client, String url, String body) {
 
-    (void) data;
-    (void) len;
+	(void) url;
+	(void) body;
 
 	DEBUG_MSG_FAUXMO("[FAUXMO] Handling /description.xml request\n");
 
@@ -149,26 +149,28 @@ void fauxmoESP::_onTCPDescription(AsyncClient *client, void *data, size_t len) {
     snprintf_P(
         response, sizeof(response),
         FAUXMO_DESCRIPTION_TEMPLATE,
-        ip[0], ip[1], ip[2], ip[3], TCP_PORT,
-        ip[0], ip[1], ip[2], ip[3], TCP_PORT,
+        ip[0], ip[1], ip[2], ip[3], _tcp_port,
+        ip[0], ip[1], ip[2], ip[3], _tcp_port,
         mac.c_str(), mac.c_str()
     );
 
 	_sendTCPResponse(client, "200 OK", response, "text/xml");
 
+	return true;
+
 }
 
-void fauxmoESP::_onTCPList(AsyncClient *client, void *data, size_t len) {
+bool fauxmoESP::_onTCPList(AsyncClient *client, String url, String body) {
 
 	DEBUG_MSG_FAUXMO("[FAUXMO] Handling list request\n");
 
-	char * p = (char *) data;
-	p[len] = 0;
-	String request = String(p);
-
 	// Get the index
-	int pos = request.indexOf("lights");
-	unsigned char id = request.substring(pos+7).toInt();
+	int pos = url.indexOf("lights");
+	if (-1 == pos) return false;
+
+	// Get the id
+	unsigned char id = url.substring(pos+7).toInt();
+
 	// This will hold the response string	
 	String response;
 
@@ -189,42 +191,41 @@ void fauxmoESP::_onTCPList(AsyncClient *client, void *data, size_t len) {
 
 	_sendTCPResponse(client, "200 OK", (char *) response.c_str(), "application/json");
 	
+	return true;
 
 }
 
-void fauxmoESP::_onTCPControl(AsyncClient *client, void *data, size_t len) {
+bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 
-	char * p = (char *) data;
-	p[len] = 0;
-	String request = String(p);
 	// "devicetype" request
-	// "devicetype" request
-	if (request.indexOf("devicetype") > 0) {
+	if (body.indexOf("devicetype") > 0) {
 		DEBUG_MSG_FAUXMO("[FAUXMO] Handling devicetype request\n");
 		_sendTCPResponse(client, "200 OK", (char *) "[{\"success\":{\"username\": \"2WLEDHardQrI3WHYTHoMcXHgEspsM8ZZRpSKtBQr\"}}]", "application/json");
-		return;
+		return true;
 	}
 
 	// "state" request
-	if (request.indexOf("state") > 0) {
+	if ((url.indexOf("state") > 0) && (body.length() > 0)) {
+
+		// Get the index
+		int pos = url.indexOf("lights");
+		if (-1 == pos) return false;
 
 		DEBUG_MSG_FAUXMO("[FAUXMO] Handling state request\n");
 
 		// Get the index
-		int pos = request.indexOf("lights");
-		unsigned char id = request.substring(pos+7).toInt();
-
+		unsigned char id = url.substring(pos+7).toInt();
 		if (id > 0) {
 
 			--id;
 
 			// Brightness
-			pos = request.indexOf("bri");
+			pos = body.indexOf("bri");
 			if (pos > 0) {
-				unsigned char value = request.substring(pos+5).toInt();
+				unsigned char value = body.substring(pos+5).toInt();
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
-			} else if (request.indexOf("false") > 0) {
+			} else if (body.indexOf("false") > 0) {
 				_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
@@ -243,58 +244,81 @@ void fauxmoESP::_onTCPControl(AsyncClient *client, void *data, size_t len) {
 				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value);
 			}
 
-			return;
+			return true;
 
 		}
 
 	}
 
-	// Else return empty response
-	_sendTCPResponse(client, "200 OK", (char *) "{}", "text/xml");
+	return false;
+	
+}
+
+bool fauxmoESP::_onTCPRequest(AsyncClient *client, bool isGet, String url, String body) {
+
+    if (!_enabled) return false;
+
+	#if DEBUG_FAUXMO_VERBOSE_TCP
+		DEBUG_MSG_FAUXMO("[FAUXMO] isGet: %s\n", isGet ? "true" : "false");
+		DEBUG_MSG_FAUXMO("[FAUXMO] URL: %s\n", url.c_str());
+		if (!isGet) DEBUG_MSG_FAUXMO("[FAUXMO] Body:\n%s\n", body.c_str());
+	#endif
+
+	if (url.equals("/description.xml")) {
+        return _onTCPDescription(client, url, body);
+    }
+
+	if (url.startsWith("/api")) {
+		if (isGet) {
+			return _onTCPList(client, url, body);
+		} else {
+       		return _onTCPControl(client, url, body);
+		}
+	}
+
+	return false;
 
 }
 
-void fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
+bool fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
 
-    if (!_enabled) return;
+    if (!_enabled) return false;
 
-	#if DEBUG_FAUXMO_VERBOSE
 	char * p = (char *) data;
 	p[len] = 0;
+
+	#if DEBUG_FAUXMO_VERBOSE_TCP
 		DEBUG_MSG_FAUXMO("[FAUXMO] TCP request\n%s\n", p);
 	#endif
 
-    {
-        char match[] = {"GET /description.xml HTTP/1.1"};
-        if (memcmp(data, match, strlen(match)-1) == 0) {
-            _onTCPDescription(client, data, len);
-            return;
-        }
-    }
+	// Method is the first word of the request
+	char * method = p;
 
-    {
-        char match[] = {"POST /api"};
-        if (memcmp(data, match, strlen(match)-1) == 0) {
-            _onTCPControl(client, data, len);
-            return;
-        }
-    }
+	while (*p != ' ') p++;
+	*p = 0;
+	p++;
+	
+	// Split word and flag start of url
+	char * url = p;
 
-    {
-        char match[] = {"PUT /api"};
-        if (memcmp(data, match, strlen(match)-1) == 0) {
-            _onTCPControl(client, data, len);
-            return;
-        }
-    }
+	// Find next space
+	while (*p != ' ') p++;
+	*p = 0;
+	p++;
 
-	{
-        char match[] = {"GET /api"};
-        if (memcmp(data, match, strlen(match)-1) == 0) {
-            _onTCPList(client, data, len);
-            return;
+	// Find double line feed
+	unsigned char c = 0;
+	while ((*p != 0) && (c < 2)) {
+		if (*p != '\r') {
+			c = (*p == '\n') ? c + 1 : 0;
 		}
+		p++;
 	}
+	char * body = p;
+
+	bool isGet = (strncmp(method, "GET", 3) == 0);
+
+	return _onTCPRequest(client, isGet, url, body);
 
 }
 
@@ -396,6 +420,10 @@ char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len
 // Public API
 // -----------------------------------------------------------------------------
 
+bool fauxmoESP::process(AsyncClient *client, bool isGet, String url, String body) {
+	return _onTCPRequest(client, isGet, url, body);
+}
+
 void fauxmoESP::handle() {
     if (_enabled) _handleUDP();
 }
@@ -413,13 +441,15 @@ void fauxmoESP::enable(bool enable) {
     if (_enabled) {
 
 		// Start TCP server if internal
-		if (NULL == _server) {
-		_server = new AsyncServer(TCP_PORT);
-			_server->onClient([this](void *s, AsyncClient* c) {
-				_onTCPClient(c);
-			}, 0);
+		if (_internal) {
+			if (NULL == _server) {
+				_server = new AsyncServer(_tcp_port);
+				_server->onClient([this](void *s, AsyncClient* c) {
+					_onTCPClient(c);
+				}, 0);
+			}
+			_server->begin();
 		}
-		_server->begin();
 
 		// UDP setup
 		#ifdef ESP32
