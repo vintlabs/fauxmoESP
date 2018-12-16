@@ -87,8 +87,6 @@ void setup() {
     // You can enable or disable the library at any moment
     // Disabling it will prevent the devices from being discovered and switched
     fauxmo.enable(true);
-    fauxmo.enable(false);
-    fauxmo.enable(true);
 
     // You can use different ways to invoke alexa to modify the devices state:
     // "Alexa, turn yellow lamp on"

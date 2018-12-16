@@ -95,7 +95,7 @@ class fauxmoESP {
     private:
 
         AsyncServer * _server;
-        bool _enabled = true;
+        bool _enabled = false;
         bool _internal = true;
         unsigned int _tcp_port = FAUXMO_TCP_PORT;
         std::vector<fauxmoesp_device_t> _devices;
