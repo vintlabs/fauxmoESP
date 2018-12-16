@@ -7,10 +7,26 @@
 #include "fauxmoESP.h"
 #include "credentials.h"
 
-#define SERIAL_BAUDRATE                 115200
-#define LED                             2
-
 fauxmoESP fauxmo;
+
+// -----------------------------------------------------------------------------
+
+#define SERIAL_BAUDRATE     115200
+
+#define LED_YELLOW          4
+#define LED_GREEN           5
+#define LED_BLUE            0
+#define LED_PINK            2
+#define LED_WHITE           15
+
+#define ID_YELLOW           "yellow lamp"
+#define ID_GREEN            "green lamp"
+#define ID_BLUE             "blue lamp"
+#define ID_PINK             "pink lamp"
+#define ID_WHITE            "white lamp"
+
+// -----------------------------------------------------------------------------
+
 // -----------------------------------------------------------------------------
 // Wifi
 // -----------------------------------------------------------------------------
@@ -43,9 +59,17 @@ void setup() {
     Serial.println();
     Serial.println();
 
-    // LED
-    pinMode(LED, OUTPUT);
-    digitalWrite(LED, HIGH); // Our LED has inverse logic (high for OFF, low for ON)
+    // LEDs
+    pinMode(LED_YELLOW, OUTPUT);
+    pinMode(LED_GREEN, OUTPUT);
+    pinMode(LED_BLUE, OUTPUT);
+    pinMode(LED_PINK, OUTPUT);
+    pinMode(LED_WHITE, OUTPUT);
+    digitalWrite(LED_YELLOW, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_BLUE, LOW);
+    digitalWrite(LED_PINK, LOW);
+    digitalWrite(LED_WHITE, LOW);
 
     // Wifi
     wifiSetup();
@@ -64,21 +88,16 @@ void setup() {
     fauxmo.enable(true);
 
     // You can use different ways to invoke alexa to modify the devices state:
-    // "Alexa, turn kitchen on" ("kitchen" is the name of the first device below)
-    // "Alexa, turn on kitchen"
-    // "Alexa, set kitchen to fifty" (50 means 50% of brightness)
+    // "Alexa, turn yellow lamp on"
+    // "Alexa, turn on yellow lamp
+    // "Alexa, set yellow lamp to fifty" (50 means 50% of brightness, note, this example does not use this functionality)
 
     // Add virtual devices
-    fauxmo.addDevice("kitchen");
-	fauxmo.addDevice("livingroom");
-
-    // You can add more devices
-	//fauxmo.addDevice("light 3");
-    //fauxmo.addDevice("light 4");
-    //fauxmo.addDevice("light 5");
-    //fauxmo.addDevice("light 6");
-    //fauxmo.addDevice("light 7");
-    //fauxmo.addDevice("light 8");
+    fauxmo.addDevice(ID_YELLOW);
+    fauxmo.addDevice(ID_GREEN);
+    fauxmo.addDevice(ID_BLUE);
+    fauxmo.addDevice(ID_PINK);
+    fauxmo.addDevice(ID_WHITE);
 
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
         
@@ -88,14 +107,22 @@ void setup() {
         // Just remember not to delay too much here, this is a callback, exit as soon as possible.
         // If you have to do something more involved here set a flag and process it in your main loop.
         
-        // if (0 == device_id) digitalWrite(RELAY1_PIN, state);
-        // if (1 == device_id) digitalWrite(RELAY2_PIN, state);
-        // if (2 == device_id) analogWrite(LED1_PIN, value);
-        
         Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
 
-        // For the example we are turning the same LED on and off regardless fo the device triggered or the value
-        digitalWrite(LED, !state); // we are nor-ing the state because our LED has inverse logic.
+        // Checking for device_id is simpler if you are certain about the order they are loaded and it does not change.
+        // Otherwise comparing the device_name is safer.
+
+        if (strcmp(device_name, ID_YELLOW)==0) {
+            digitalWrite(LED_YELLOW, state ? HIGH : LOW);
+        } else if (strcmp(device_name, ID_GREEN)==0) {
+            digitalWrite(LED_GREEN, state ? HIGH : LOW);
+        } else if (strcmp(device_name, ID_BLUE)==0) {
+            digitalWrite(LED_BLUE, state ? HIGH : LOW);
+        } else if (strcmp(device_name, ID_PINK)==0) {
+            digitalWrite(LED_PINK, state ? HIGH : LOW);
+        } else if (strcmp(device_name, ID_WHITE)==0) {
+            digitalWrite(LED_WHITE, state ? HIGH : LOW);
+        }
 
     });
 
