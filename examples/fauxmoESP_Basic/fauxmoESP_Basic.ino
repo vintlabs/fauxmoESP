@@ -5,6 +5,9 @@
     #include <ESP8266WiFi.h>
 #endif
 #include "fauxmoESP.h"
+
+// Rename the credentials.sample.h file to credentials.h and 
+// edit it according to your router configuration
 #include "credentials.h"
 
 fauxmoESP fauxmo;

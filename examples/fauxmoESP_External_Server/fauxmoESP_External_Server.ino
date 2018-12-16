@@ -6,13 +6,18 @@
 #endif
 #include <ESPAsyncWebServer.h>
 #include "fauxmoESP.h"
-#include "credentials.h"
 
-#define SERIAL_BAUDRATE                 115200
-#define LED                             2
+// Rename the credentials.sample.h file to credentials.h and 
+// edit it according to your router configuration
+#include "credentials.h"
 
 fauxmoESP fauxmo;
 AsyncWebServer server(80);
+
+// -----------------------------------------------------------------------------
+
+#define SERIAL_BAUDRATE                 115200
+#define LED                             2
 
 // -----------------------------------------------------------------------------
 // Wifi
