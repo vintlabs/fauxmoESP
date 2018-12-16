@@ -414,7 +414,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 }
 
 bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
-    if (id <= _devices.size()) {
+    if (id < _devices.size()) {
         free(_devices[id].name);
         _devices[id].name = strdup(device_name);
         DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d renamed to '%s'\n", id, device_name);
@@ -424,7 +424,7 @@ bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
 }
 
 bool fauxmoESP::removeDevice(unsigned char id) {
-    if (id <= _devices.size()) {
+    if (id < _devices.size()) {
         free(_devices[id].name);
 		_devices.erase(_devices.begin()+id);
         DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d removed\n", id);
@@ -434,7 +434,7 @@ bool fauxmoESP::removeDevice(unsigned char id) {
 }
 
 char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len) {
-    if ((id <= _devices.size()) && (device_name != NULL)) {
+    if ((id < _devices.size()) && (device_name != NULL)) {
         strncpy(device_name, _devices[id].name, len);
     }
     return device_name;
