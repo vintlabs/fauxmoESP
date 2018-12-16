@@ -2,24 +2,29 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-TSetStateCallback       KEYWORD1
+TSetStateCallback KEYWORD1
 
 #######################################
 # Classes (KEYWORD1)
 #######################################
 
-fauxmoESP               KEYWORD1
+fauxmoESP KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-addDevice               KEYWORD2
-renameDevice            KEYWORD2
-getDeviceName           KEYWORD2
-onSetState              KEYWORD2
-enable                  KEYWORD2
-handle                  KEYWORD2
+addDevice KEYWORD2
+createServer KEYWORD2
+enable KEYWORD2
+getDeviceId KEYWORD2
+getDeviceName KEYWORD2
+handle KEYWORD2
+onSetState KEYWORD2
+process KEYWORD2
+renameDevice  KEYWORD2
+removeDevice KEYWORKD2
+setPort KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
