@@ -43,12 +43,12 @@ void setup() {
     Serial.println();
     Serial.println();
 
-    // Wifi
-    wifiSetup();
-
     // LED
     pinMode(LED, OUTPUT);
     digitalWrite(LED, HIGH); // Our LED has inverse logic (high for OFF, low for ON)
+
+    // Wifi
+    wifiSetup();
 
     // By default, fauxmoESP creates it's own webserver on the defined port
     // The TCP port must be 80 for gen3 devices (default is 1901)

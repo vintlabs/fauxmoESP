@@ -326,7 +326,7 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
 
 	if (_enabled) {
 
-	    for (unsigned char i = 0; i < TCP_MAX_CLIENTS; i++) {
+	    for (unsigned char i = 0; i < FAUXMO_TCP_MAX_CLIENTS; i++) {
 
 	        if (!_tcpClients[i] || !_tcpClients[i]->connected()) {
 
@@ -354,6 +354,8 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
 	                DEBUG_MSG_FAUXMO("[FAUXMO] Timeout on client #%d at %i\n", i, time);
 	                c->close();
 	            }, 0);
+
+                    client->setRxTimeout(FAUXMO_RX_TIMEOUT);
 
 	            DEBUG_MSG_FAUXMO("[FAUXMO] Client #%d connected\n", i);
 	            return;
@@ -453,9 +455,9 @@ void fauxmoESP::enable(bool enable) {
 
 		// UDP setup
 		#ifdef ESP32
-            _udp.beginMulticast(UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+            _udp.beginMulticast(FAUXMO_UDP_MULTICAST_IP, FAUXMO_UDP_MULTICAST_PORT);
         #else
-            _udp.beginMulticast(WiFi.localIP(), UDP_MULTICAST_IP, UDP_MULTICAST_PORT);
+            _udp.beginMulticast(WiFi.localIP(), FAUXMO_UDP_MULTICAST_IP, FAUXMO_UDP_MULTICAST_PORT);
         #endif
         DEBUG_MSG_FAUXMO("[FAUXMO] UDP server started\n");
 

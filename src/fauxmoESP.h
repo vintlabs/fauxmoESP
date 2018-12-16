@@ -28,10 +28,11 @@ THE SOFTWARE.
 
 #pragma once
 
-#define UDP_MULTICAST_IP            IPAddress(239,255,255,250)
-#define UDP_MULTICAST_PORT          1900
-#define TCP_MAX_CLIENTS             10
-#define TCP_PORT                    1901
+#define FAUXMO_UDP_MULTICAST_IP     IPAddress(239,255,255,250)
+#define FAUXMO_UDP_MULTICAST_PORT   1900
+#define FAUXMO_TCP_MAX_CLIENTS      10
+#define FAUXMO_TCP_PORT             1901
+#define FAUXMO_RX_TIMEOUT           3
 
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(fmt, ...) { static const char pfmt[] PROGMEM = fmt; DEBUG_FAUXMO.printf_P(pfmt, ## __VA_ARGS__); }
@@ -91,13 +92,13 @@ class fauxmoESP {
         AsyncServer * _server;
         bool _enabled = true;
         bool _internal = true;
-        unsigned int _tcp_port = TCP_PORT;
+        unsigned int _tcp_port = FAUXMO_TCP_PORT;
         std::vector<fauxmoesp_device_t> _devices;
 		#ifdef ESP8266
         WiFiEventHandler _handler;
 		#endif
         WiFiUDP _udp;
-        AsyncClient * _tcpClients[TCP_MAX_CLIENTS];
+        AsyncClient * _tcpClients[FAUXMO_TCP_MAX_CLIENTS];
         TSetStateCallback _setCallback = NULL;
 
         String _deviceJson(unsigned char id);
