@@ -34,6 +34,7 @@ THE SOFTWARE.
 #define FAUXMO_TCP_PORT             1901
 #define FAUXMO_RX_TIMEOUT           3
 
+//#define DEBUG_FAUXMO                Serial
 #ifdef DEBUG_FAUXMO
     #define DEBUG_MSG_FAUXMO(fmt, ...) { static const char pfmt[] PROGMEM = fmt; DEBUG_FAUXMO.printf_P(pfmt, ## __VA_ARGS__); }
 #else
