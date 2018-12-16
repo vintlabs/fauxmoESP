@@ -4,8 +4,11 @@ Amazon Alexa support for ESP8266 and ESP32 devices.
 
 This is a library for ESP8266/ESP32-based devices that emulates Philips Hue lights and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
-[![version](https://img.shields.io/badge/version-3.0.2-brightgreen.svg)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-3.1.0-brightgreen.svg)](CHANGELOG.md)
+[![codacy](https://img.shields.io/codacy/grade/44478ddd58fe4cc6a2bc5598232663b8/dev.svg)](https://www.codacy.com/app/xoseperez/fauxmoesp/dashboard)
 [![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+
+
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=xose%2eperez%40gmail%2ecom&lc=US&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 [![twitter](https://img.shields.io/twitter/follow/xoseperez.svg?style=social)](https://twitter.com/intent/follow?screen_name=xoseperez)
 
