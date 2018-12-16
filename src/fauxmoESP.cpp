@@ -423,6 +423,27 @@ bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
     return false;
 }
 
+bool fauxmoESP::renameDevice(const char * old_device_name, const char * new_device_name) {
+    for (unsigned char id=0; id < _devices.size(); id++) {
+        if (strcmp(_devices[id].name, old_device_name) == 0) {
+            free(_devices[id].name);
+            _devices[id].name = strdup(new_device_name);
+            DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d renamed to '%s'\n", id, new_device_name);
+            return true;
+        }
+    }
+    return false;
+}
+
+int fauxmoESP::getDeviceId(const char * device_name) {
+    for (unsigned int id=0; id < _devices.size(); id++) {
+        if (strcmp(_devices[id].name, device_name) == 0) {
+            return id;
+        }
+    }
+    return -1;
+}
+
 bool fauxmoESP::removeDevice(unsigned char id) {
     if (id < _devices.size()) {
         free(_devices[id].name);
