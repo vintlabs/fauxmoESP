@@ -77,8 +77,11 @@ class fauxmoESP {
 
     public:
 
+        ~fauxmoESP();
+
         unsigned char addDevice(const char * device_name);
         bool renameDevice(unsigned char id, const char * device_name);
+        bool removeDevice(unsigned char id);
         char * getDeviceName(unsigned char id, char * buffer, size_t len);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
         bool process(AsyncClient *client, bool isGet, String url, String body);
