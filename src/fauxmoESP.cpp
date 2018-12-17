@@ -413,6 +413,15 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
 }
 
+int fauxmoESP::getDeviceId(const char * device_name) {
+    for (unsigned int id=0; id < _devices.size(); id++) {
+        if (strcmp(_devices[id].name, device_name) == 0) {
+            return id;
+        }
+    }
+    return -1;
+}
+
 bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
     if (id < _devices.size()) {
         free(_devices[id].name);
@@ -424,24 +433,9 @@ bool fauxmoESP::renameDevice(unsigned char id, const char * device_name) {
 }
 
 bool fauxmoESP::renameDevice(const char * old_device_name, const char * new_device_name) {
-    for (unsigned char id=0; id < _devices.size(); id++) {
-        if (strcmp(_devices[id].name, old_device_name) == 0) {
-            free(_devices[id].name);
-            _devices[id].name = strdup(new_device_name);
-            DEBUG_MSG_FAUXMO("[FAUXMO] Device #%d renamed to '%s'\n", id, new_device_name);
-            return true;
-        }
-    }
-    return false;
-}
-
-int fauxmoESP::getDeviceId(const char * device_name) {
-    for (unsigned int id=0; id < _devices.size(); id++) {
-        if (strcmp(_devices[id].name, device_name) == 0) {
-            return id;
-        }
-    }
-    return -1;
+	int id = getDeviceId(old_device_name);
+	if (id < 0) return false;
+	return renameDevice(id, new_device_name);
 }
 
 bool fauxmoESP::removeDevice(unsigned char id) {
@@ -454,11 +448,26 @@ bool fauxmoESP::removeDevice(unsigned char id) {
     return false;
 }
 
+bool fauxmoESP::removeDevice(const char * device_name) {
+	int id = getDeviceId(device_name);
+	if (id < 0) return false;
+	return removeDevice(id);
+}
+
 char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len) {
     if ((id < _devices.size()) && (device_name != NULL)) {
         strncpy(device_name, _devices[id].name, len);
     }
     return device_name;
+}
+
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value) {
+    if (id < _devices.size()) {
+		_devices[id].state = state;
+		_devices[id].value = value;
+		return true;
+	}
+	return false;
 }
 
 // -----------------------------------------------------------------------------

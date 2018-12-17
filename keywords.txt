@@ -25,6 +25,7 @@ process KEYWORD2
 renameDevice  KEYWORD2
 removeDevice KEYWORKD2
 setPort KEYWORD2
+setState KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)

@@ -88,9 +88,11 @@ class fauxmoESP {
         bool renameDevice(unsigned char id, const char * device_name);
         bool renameDevice(const char * old_device_name, const char * new_device_name);
         bool removeDevice(unsigned char id);
+        bool removeDevice(const char * device_name);
         char * getDeviceName(unsigned char id, char * buffer, size_t len);
         int getDeviceId(const char * device_name);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
+        bool setState(unsigned char id, bool state, unsigned char value);
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
