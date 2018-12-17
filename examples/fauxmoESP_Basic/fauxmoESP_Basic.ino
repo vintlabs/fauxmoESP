@@ -143,4 +143,8 @@ void loop() {
         Serial.printf("[MAIN] Free heap: %d bytes\n", ESP.getFreeHeap());
     }
 
+    // If your device state is changed by any other means (MQTT, physical button,...)
+    // you can instruct the library to report the new state to Alexa on next request:
+    // fauxmo.setState(ID_YELLOW, true, 255);
+
 }

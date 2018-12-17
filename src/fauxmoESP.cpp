@@ -470,6 +470,14 @@ bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value) {
 	return false;
 }
 
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned char value) {
+	int id = getDeviceId(device_name);
+	if (id < 0) return false;
+	_devices[id].state = state;
+	_devices[id].value = value;
+	return true;
+}
+
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------

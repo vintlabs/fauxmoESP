@@ -93,6 +93,7 @@ class fauxmoESP {
         int getDeviceId(const char * device_name);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
         bool setState(unsigned char id, bool state, unsigned char value);
+        bool setState(const char * device_name, bool state, unsigned char value);
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
