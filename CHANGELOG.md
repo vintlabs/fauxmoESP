@@ -3,6 +3,25 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.0] 2018-11-18
+### Fixed
+- PlatformIO dependencies (#60)
+- Fix issue with enable() call that prevented it from working the first time (#39)
+
+### Changed
+- Improved examples & documentation (#62, #65)
+- Not using printf_P in ESP8266 since 2.3.0 does not support it (#69)
+
+### Added
+- Support for gen3 (third generation) Alexa devices (#66)
+- Option to use external webserver to handle TCP requests
+- RX timeout
+- Free class resources upon object deletion
+- Method to remove a device
+- Method to rename a devices based on the old name (#57)
+- Method to get a device_id from the name (#57)
+- Method setState to report state changes to Alexa (#59)
+
 ## [3.0.2] 2018-10-08
 ### Fixed
 - Removed symlinks to allow Arduino track the library
