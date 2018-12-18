@@ -31,19 +31,7 @@ ESP32:
 
 ### PlatformIO
 
-If you are using PlatformIO (check the section bellow on how to compile it) you can install them by adding the dependencies to your ```platformio.ini``` file
-
-If using ESP8266:
-
-```
-lib_deps = ESPAsyncTCP
-```
-
-or, if using ESP32:
-
-```
-lib_deps = AsyncTCP
-```
+If you are using PlatformIO (check the section bellow on how to compile it) the required libraries should be installed automatically.
 
 ### Arduino IDE
 
@@ -71,13 +59,12 @@ void setup() {
 
     ... connect to wifi ...
 
-    fauxmo.setPort(80); // required for gen3 devices
-
     fauxmo.addDevice("light one");
     fauxmo.addDevice("light two");
     fauxmo.addDevice("light three");
     fauxmo.addDevice("light four");
 
+    fauxmo.setPort(80); // required for gen3 devices
     fauxmo.enable(true);
 
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
