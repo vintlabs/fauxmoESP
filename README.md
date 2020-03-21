@@ -108,6 +108,8 @@ Current status of the library:
 
 * Some people have reported problems when the ESP and the Alexa devices are connected to different wireless networks (like 2.4 and 5GHz bands on some routers). See https://bitbucket.org/xoseperez/fauxmoesp/issues/53.
 
+* Latest version of ESP Async Webserver fails building with the current setup. Use version 1.2.2 max. See fauxmoESP_External_Server example `platformio.ini` file.
+
 [1]:https://github.com/esp8266/Arduino
 [2]:http://docs.platformio.org/en/stable/platforms/espressif8266.html#using-arduino-framework-with-staging-version
 [3]:https://github.com/me-no-dev/ESPAsyncTCP
@@ -117,7 +119,7 @@ Current status of the library:
 
 ## License
 
-Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
+Copyright (C) 2016-2020 by Xose Pérez <xose dot perez at gmail dot com>
 
 The MIT License (MIT)
 
