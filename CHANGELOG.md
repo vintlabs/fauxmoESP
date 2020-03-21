@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.1] 2020-03-21
+### Changed
+- Freeze platformio.ini configuration
+
+### Added 
+- Add ssdp:discover to accepted UDP answers (#58, thanks to @rodymary)
+
 ## [3.1.0] 2018-11-18
 ### Fixed
 - PlatformIO dependencies (#60)
