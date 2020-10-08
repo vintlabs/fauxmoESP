@@ -126,7 +126,7 @@ Current status of the library:
 
 ## License
 
-Copyright (C) 2016-2020 by Xose Pérez <xose dot perez at gmail dot com>
+Copyright (C) 2016-2020 by Xose Pérez <xose dot perez at gmail dot com>, 2020 by Paul Vint <pjvint at gmail dot com>
 
 The MIT License (MIT)
 
