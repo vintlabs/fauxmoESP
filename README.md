@@ -13,9 +13,9 @@ This is a library for ESP8266/ESP32-based devices that emulates Philips Hue ligh
 
 ## Notice
 
-**Version 3.1.1 of this library is the last one I'm going to release. I have no time to maintain the library and I'm no longer willing to provide Alexa compatibility options.**
+** As of October 2020 https://github.com/pvint/fauxmoESP is the new home for fauxmoESP **
 
-**Anyone interested in maintaining the library just drop me an email and I will gladly handle over the project to her/him.**
+** Many thanks for all of the work that Xose Perez has put into this project! **
 
 ## History
 
