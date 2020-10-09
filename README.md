@@ -17,6 +17,8 @@ This is a library for ESP8266/ESP32-based devices that emulates Philips Hue ligh
 
 **Many thanks for all of the work that Xose Perez has put into this project!**
 
+*I have migrated all of the issues from the old repo on Bitbucket here to GitHub, and I have closed many stale issues. If I have closed an issue that you feel should still be open, feel free to reopen it or submit a new one.*
+
 
 ## History
 
@@ -87,6 +89,11 @@ void loop() {
 ```
 
 (Check the examples folder)
+
+#To use with ESP-IDF
+
+Add `#include "Arduino.h"`
+
 
 Then run the "discover devices" option from your Alexa app or web (in the Smart Home section). A new device with the name you have configured should appear. Tell Alexa to switch it on or off and check your terminal ;)
 
