@@ -90,7 +90,7 @@ void loop() {
 
 (Check the examples folder)
 
-#To use with ESP-IDF
+##To use with ESP-IDF
 
 Add `#include "Arduino.h"`
 
