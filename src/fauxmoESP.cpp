@@ -124,7 +124,7 @@ String fauxmoESP::_deviceJson(unsigned char id) {
     snprintf_P(
         buffer, sizeof(buffer),
         FAUXMO_DEVICE_JSON_TEMPLATE,
-        device.name, mac.c_str(), id+1,
+        device.name, mac.substring(6).c_str(), id, 
         device.state ? "true": "false",
         device.value
     );
