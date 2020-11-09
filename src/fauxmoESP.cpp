@@ -338,10 +338,14 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
 	            client->onData([this, i](void *s, AsyncClient *c, void *data, size_t len) {
 	                _onTCPData(c, data, len);
 	            }, 0);
-
 	            client->onDisconnect([this, i](void *s, AsyncClient *c) {
-	                _tcpClients[i]->free();
-	                _tcpClients[i] = NULL;
+			if(_tcpClients[i] != NULL) {
+	                    _tcpClients[i]->free();
+	                    _tcpClients[i] = NULL;
+	                }
+			else {
+	                    DEBUG_MSG_FAUXMO("[FAUXMO] Client %d already disconnected\n", i);
+	                }
 	                delete c;
 	                DEBUG_MSG_FAUXMO("[FAUXMO] Client #%d disconnected\n", i);
 	            }, 0);
