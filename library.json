@@ -4,7 +4,7 @@
     "description": "Amazon Alexa support for ESP8266 and ESP32 (Amazon Echo & Dot)",
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/xoseperez/fauxmoESP"
+        "url": "https://github.com/vintlabs/fauxmoESP"
     },
     "version": "3.1.1",
     "license": "MIT",
@@ -12,9 +12,9 @@
     "frameworks": "arduino",
     "platforms": ["espressif8266", "espressif32"],
     "authors": {
-        "name": "Xose Perez",
-        "email": "xose.perez@gmail.com",
-        "url": "http://tinkerman.cat",
+        "name": "Paul Vint",
+        "email": "paul@vintlabs.com",
+        "url": "http://vintlabs.com",
         "maintainer": true
     },
     "dependencies": [ 
