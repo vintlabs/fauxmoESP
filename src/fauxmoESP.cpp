@@ -28,6 +28,7 @@ THE SOFTWARE.
 
 #include <Arduino.h>
 #include "fauxmoESP.h"
+#include <MD5Builder.h>
 
 // -----------------------------------------------------------------------------
 // UDP
@@ -111,27 +112,54 @@ void fauxmoESP::_sendTCPResponse(AsyncClient *client, const char * code, char * 
 
 }
 
+String byte2hex(byte Zahl){
+  	String Hstring = String(Zahl, HEX);
+  	if (Zahl < 16){Hstring = "0" + Hstring;}
+  	return Hstring;
+}
+
+String makeMD5 (String text){
+	byte bbuff[16];
+  	String hash = "";
+      	MD5Builder md5; 
+      	md5.begin();
+      	md5.add(text); 
+      	md5.calculate(); 
+      	md5.getBytes(bbuff);
+      	for ( byte i = 0; i < 16; i++) hash += byte2hex(bbuff[i]);
+      	return hash;   
+}
+
 String fauxmoESP::_deviceJson(unsigned char id) {
 
 	if (id >= _devices.size()) return "{}";
 
 	String mac = WiFi.macAddress();
-    mac.replace(":", "");
-    mac.toLowerCase();
+        mac.replace(":", "");
+        mac.toLowerCase();
 
 	fauxmoesp_device_t device = _devices[id];
+	
+	mac.concat(device.name);
+	DEBUG_MSG_FAUXMO("[MYDEBUG] mac concat device.name: ");
+	DEBUG_MSG_FAUXMO("%s\n", mac.c_str());
+	String hash = makeMD5(mac).substring(0,16);     
+	DEBUG_MSG_FAUXMO("[MYDEBUG] devjson hash: ");
+	DEBUG_MSG_FAUXMO("%s", hash.c_str());
+	DEBUG_MSG_FAUXMO("\n");	
+
     char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
     snprintf_P(
         buffer, sizeof(buffer),
         FAUXMO_DEVICE_JSON_TEMPLATE,
-        device.name, mac.substring(6).c_str(), id, 
+        device.name, hash.c_str(),
         device.state ? "true": "false",
         device.value
     );
-
+	//free(hash);
 	return String(buffer);
-
 }
+
 
 bool fauxmoESP::_onTCPDescription(AsyncClient *client, String url, String body) {
 
