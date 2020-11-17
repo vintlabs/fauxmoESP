@@ -116,21 +116,57 @@ String fauxmoESP::_deviceJson(unsigned char id) {
 	if (id >= _devices.size()) return "{}";
 
 	String mac = WiFi.macAddress();
-    mac.replace(":", "");
-    mac.toLowerCase();
+  mac.replace(":", "");
+  mac.toLowerCase();
 
 	fauxmoesp_device_t device = _devices[id];
-    char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
-    snprintf_P(
+
+  // To create the uniqueID, we use the device's MAC, add the device name
+  // then use a truncated MD5 hash to create an ID that is unique and repeatable
+  mac.concat(device.name); 
+  String hash = _makeMD5(mac).substring(0,12);  
+
+  DEBUG_MSG_FAUXMO("[FAUXMO] Sending device info for \"%s\", uniqueID = \"%s\"\n", device.name, hash.c_str());
+  char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
+  snprintf_P(
         buffer, sizeof(buffer),
         FAUXMO_DEVICE_JSON_TEMPLATE,
-        device.name, mac.substring(6).c_str(), id, 
+        device.name, hash.c_str(),
         device.state ? "true": "false",
         device.value
     );
 
 	return String(buffer);
 
+}
+
+String fauxmoESP::_byte2hex(uint8_t zahl)
+{
+  String hstring = String(zahl, HEX);
+  if (zahl < 16)
+  {
+    hstring = "0" + hstring;
+  }
+
+  return hstring;
+}
+
+String fauxmoESP::_makeMD5(String text)
+{
+  unsigned char bbuf[16];
+  String hash = "";
+  MD5Builder md5;
+  md5.begin();
+  md5.add(text);
+  md5.calculate();
+  
+  md5.getBytes(bbuf);
+  for (uint8_t i = 0; i < 16; i++)
+  {
+    hash += _byte2hex(bbuf[i]);
+  }
+
+  return hash;
 }
 
 bool fauxmoESP::_onTCPDescription(AsyncClient *client, String url, String body) {
