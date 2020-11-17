@@ -115,23 +115,14 @@ String fauxmoESP::_deviceJson(unsigned char id) {
 
 	if (id >= _devices.size()) return "{}";
 
-	String mac = WiFi.macAddress();
-  mac.replace(":", "");
-  mac.toLowerCase();
-
 	fauxmoesp_device_t device = _devices[id];
 
-  // To create the uniqueID, we use the device's MAC, add the device name
-  // then use a truncated MD5 hash to create an ID that is unique and repeatable
-  mac.concat(device.name); 
-  String hash = _makeMD5(mac).substring(0,12);  
-
-  DEBUG_MSG_FAUXMO("[FAUXMO] Sending device info for \"%s\", uniqueID = \"%s\"\n", device.name, hash.c_str());
+  DEBUG_MSG_FAUXMO("[FAUXMO] Sending device info for \"%s\", uniqueID = \"%s\"\n", device.name, device.uniqueid);
   char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
   snprintf_P(
         buffer, sizeof(buffer),
         FAUXMO_DEVICE_JSON_TEMPLATE,
-        device.name, hash.c_str(),
+        device.name, device.uniqueid,
         device.state ? "true": "false",
         device.value
     );
@@ -434,6 +425,11 @@ fauxmoESP::~fauxmoESP() {
 
 }
 
+void fauxmoESP::setDeviceUniqueId(unsigned char id, const char *uniqueid)
+{
+    strncpy(_devices[id].uniqueid, uniqueid, FAUXMO_DEVICE_UNIQUE_ID_LENGTH);
+}
+
 unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     fauxmoesp_device_t device;
@@ -441,9 +437,20 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     // init properties
     device.name = strdup(device_name);
-	device.state = false;
-	device.value = 0;
+  	device.state = false;
+	  device.value = 0;
 
+    // create the uniqueid
+    String mac = WiFi.macAddress();
+    mac.replace(":", "");
+    mac.toLowerCase();
+
+    // To create the uniqueID, we use the device's MAC, add the device name
+    // then use a truncated MD5 hash to create an ID that is unique and repeatable
+    mac.concat(device.name); 
+    String hash = _makeMD5(mac).substring(0,FAUXMO_DEVICE_UNIQUE_ID_LENGTH);  
+    strcpy(device.uniqueid, hash.c_str());
+    
     // Attach
     _devices.push_back(device);
 
