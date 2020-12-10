@@ -3,6 +3,11 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.2] 2020-12-08
+### Changed
+- Changed `uniqueid` to fix Alexa discovery issue 
+- Added `setDeviceUniqueId(unsigned char id, const char *uniqueid)` to optionally manually set a uniqueid
+
 ## [3.1.1] 2020-03-21
 ### Changed
 - Freeze platformio.ini configuration
