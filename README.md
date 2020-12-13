@@ -11,6 +11,9 @@ This is a library for ESP8266/ESP32-based devices that emulates Philips Hue ligh
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=xose%2eperez%40gmail%2ecom&lc=US&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
 [![twitter](https://img.shields.io/twitter/follow/xoseperez.svg?style=social)](https://twitter.com/intent/follow?screen_name=xoseperez)
 
+## NEW! Discussions on Github
+We now have a place for general discussion, ideas, projects etc. - https://github.com/vintlabs/fauxmoESP/discussions/133
+
 ## Notice
 
 **As of October 2020 https://github.com/vintlabs/fauxmoESP is the new home for fauxmoESP!!**
