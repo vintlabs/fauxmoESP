@@ -133,6 +133,9 @@ Current status of the library:
 [5]:https://github.com/me-no-dev
 [6]:https://github.com/makermusings/fauxmo
 
+## If you enjoy this, please consider supporting us by purchasing a module from us!
+http://www.vintlabs.com
+
 ## License
 
 Copyright (C) 2016-2020 by Xose Pérez <xose dot perez at gmail dot com>, 2020 by Paul Vint <pjvint at gmail dot com>
