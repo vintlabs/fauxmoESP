@@ -124,7 +124,8 @@ String fauxmoESP::_deviceJson(unsigned char id) {
         FAUXMO_DEVICE_JSON_TEMPLATE,
         device.name, device.uniqueid,
         device.state ? "true": "false",
-        device.value
+        device.value, device.hue,
+        device.saturation, device.ct
     );
 
 	return String(buffer);
@@ -253,22 +254,50 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
 			} else if (body.indexOf("false") > 0) {
-				_devices[id].state = false;
+      	_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
 				if (0 == _devices[id].value) _devices[id].value = 255;
 			}
 
-			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+10];
+      // Hue / Saturation
+      pos = body.indexOf("hue");
+      if (pos > 0)
+      {
+        unsigned char hue = body.substring(pos + 5).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting hue to %d\n", hue);
+        _devices[id].hue = hue;
+      }
+      
+      pos = body.indexOf("\"sat\"");
+      if (pos > 0)
+      {
+        unsigned char saturation = body.substring(pos + 6).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting saturation to %d\n", saturation);
+        _devices[id].saturation = saturation;
+      }
+printf("Checking CT\n");
+      // Colour temperature
+      pos = body.indexOf("\"ct\"");
+      if (pos > 0)
+      {
+        printf("Found CT\n");
+        unsigned int ct = body.substring(pos + 5).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting ct to %d\n", ct);
+        _devices[id].ct = ct;
+      }
+      
+			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+23];
 			snprintf_P(
 				response, sizeof(response),
 				FAUXMO_TCP_STATE_RESPONSE,
-				id+1, _devices[id].state ? "true" : "false", id+1, _devices[id].value
+				id+1, _devices[id].state ? "true" : "false", id+1, _devices[id].value, id+1, _devices[id].hue, id+1, _devices[id].saturation, id+1,  _devices[id].ct
 			);
+      DEBUG_MSG_FAUXMO("[FAUXMO] Sending state response:\n%s\n", response);
 			_sendTCPResponse(client, "200 OK", response, "text/xml");
 
 			if (_setCallback) {
-				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value);
+				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value, _devices[id].hue, _devices[id].saturation, _devices[id].ct);
 			}
 
 			return true;
@@ -314,9 +343,9 @@ bool fauxmoESP::_onTCPData(AsyncClient *client, void *data, size_t len) {
 	char * p = (char *) data;
 	p[len] = 0;
 
-	#if DEBUG_FAUXMO_VERBOSE_TCP
+	//#if DEBUG_FAUXMO_VERBOSE_TCP
 		DEBUG_MSG_FAUXMO("[FAUXMO] TCP request\n%s\n", p);
-	#endif
+	//#endif
 
 	// Method is the first word of the request
 	char * method = p;
@@ -439,6 +468,9 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     device.name = strdup(device_name);
   	device.state = false;
 	  device.value = 0;
+    device.hue = 0;
+    device.saturation = 0;
+    device.ct = 0;
 
     // create the uniqueid
     String mac = WiFi.macAddress();
@@ -508,6 +540,7 @@ char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len
     return device_name;
 }
 
+// For on/off and Brightness
 bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value) {
     if (id < _devices.size()) {
 		_devices[id].state = state;
@@ -525,6 +558,39 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned char val
 	return true;
 }
 
+// For hue / Saturation
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned char hue, unsigned int saturation) {
+    if (id < _devices.size()) {
+      _devices[id].hue = hue;
+      _devices[id].saturation = saturation;
+    return true;
+  }
+  return false;
+}
+
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned char hue, unsigned int saturation) {
+  int id = getDeviceId(device_name);
+  if (id < 0) return false;
+    _devices[id].hue = hue;
+    _devices[id].saturation = saturation;
+  return true;
+}
+
+// For Colour Temperature (ct)
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned int ct) {
+    if (id < _devices.size()) {
+      _devices[id].ct = ct;
+      return true;
+  }
+  return false;
+}
+
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned int ct) {
+  int id = getDeviceId(device_name);
+  if (id < 0) return false;
+    _devices[id].ct = ct;
+    return true;
+}
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------

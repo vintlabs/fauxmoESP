@@ -36,17 +36,20 @@ PROGMEM const char FAUXMO_TCP_HEADERS[] =
 
 PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
     "{\"success\":{\"/lights/%d/state/on\":%s}},"
-    "{\"success\":{\"/lights/%d/state/bri\":%d}}"   // not needed?
+    "{\"success\":{\"/lights/%d/state/bri\":%d}},"   // not needed?
+    "{\"success\":{\"/lights/%d/state/hue\":%d}},"
+    "{\"success\":{\"/lights/%d/state/sat\":%d}},"
+    "{\"success\":{\"/lights/%d/state/ct\":%d}}"
 "]";
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
 PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
-    "\"type\":\"Dimmable light\","
+    "\"type\":\"Extended color light\","
     "\"name\":\"%s\","
     "\"uniqueid\":\"%s\","
     "\"modelid\":\"LCT007\","
     "\"state\":{"
-        "\"on\":%s,\"bri\":%d,\"xy\":[0,0],\"reachable\": true"
+        "\"on\":%s,\"bri\":%d,\"xy\":[0,0],\"colormode\":\"ct\",\"hue\": %d,\"sat\":%d,\"effect\":\"none\",\"ct\":%d,\"reachable\": true"
     "},"
     "\"capabilities\":{"
         "\"certified\":false,"

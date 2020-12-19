@@ -35,7 +35,7 @@ THE SOFTWARE.
 #define FAUXMO_RX_TIMEOUT           3
 #define FAUXMO_DEVICE_UNIQUE_ID_LENGTH  12
 
-//#define DEBUG_FAUXMO                Serial
+#define DEBUG_FAUXMO                Serial
 #ifdef DEBUG_FAUXMO
     #if defined(ARDUINO_ARCH_ESP32)
         #define DEBUG_MSG_FAUXMO(fmt, ...) { DEBUG_FAUXMO.printf_P((PGM_P) PSTR(fmt), ## __VA_ARGS__); }
@@ -47,7 +47,7 @@ THE SOFTWARE.
 #endif
 
 #ifndef DEBUG_FAUXMO_VERBOSE_TCP
-#define DEBUG_FAUXMO_VERBOSE_TCP    false
+#define DEBUG_FAUXMO_VERBOSE_TCP    true
 #endif
 
 #ifndef DEBUG_FAUXMO_VERBOSE_UDP
@@ -72,12 +72,15 @@ THE SOFTWARE.
 #include <MD5Builder.h>
 #include "templates.h"
 
-typedef std::function<void(unsigned char, const char *, bool, unsigned char)> TSetStateCallback;
+typedef std::function<void(unsigned char, const char *, bool, unsigned char, unsigned char, unsigned int, unsigned int)> TSetStateCallback;
 
 typedef struct {
     char * name;
     bool state;
     unsigned char value;
+    unsigned char hue;
+    unsigned int saturation;
+    unsigned int ct;
     char uniqueid[13];
 } fauxmoesp_device_t;
 
@@ -96,8 +99,13 @@ class fauxmoESP {
         int getDeviceId(const char * device_name);
         void setDeviceUniqueId(unsigned char id, const char *uniqueid);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
+        // These overloaded functions are starting to get ugly....
         bool setState(unsigned char id, bool state, unsigned char value);
         bool setState(const char * device_name, bool state, unsigned char value);
+        bool setState(unsigned char id, bool state, unsigned char hue, unsigned int saturation);
+        bool setState(const char * device_name, bool state, unsigned char value, unsigned int saturation);
+                bool setState(unsigned char id, bool state, unsigned int ct);
+        bool setState(const char * device_name, bool state, unsigned int ct);
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
