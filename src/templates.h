@@ -41,7 +41,7 @@ PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
 PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
-    "\"type\":\"Dimmable light\","
+    "\"type\":\"Extended color light\","
     "\"name\":\"%s\","
     "\"uniqueid\":\"%s\","
     "\"modelid\":\"LCT007\","
