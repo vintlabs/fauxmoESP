@@ -81,6 +81,7 @@ typedef struct {
     unsigned int hue;
     unsigned int saturation;
     unsigned int ct;
+    char colormode[3];  // This might have to change to an enum 
     char uniqueid[13];
 } fauxmoesp_device_t;
 

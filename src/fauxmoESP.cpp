@@ -124,8 +124,9 @@ String fauxmoESP::_deviceJson(unsigned char id) {
         FAUXMO_DEVICE_JSON_TEMPLATE,
         device.name, device.uniqueid,
         device.state ? "true": "false",
-        device.value, device.hue,
-        device.saturation, device.ct
+        device.value, device.colormode,
+        device.hue, device.saturation, 
+        device.ct
     );
 
 	return String(buffer);
@@ -267,6 +268,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
         unsigned int hue = body.substring(pos + 5).toInt();
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting hue to %d\n", hue);
         _devices[id].hue = hue;
+        strcpy(_devices[id].colormode, "hs");
       }
       
       pos = body.indexOf("\"sat\"");
@@ -275,6 +277,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
         unsigned char saturation = body.substring(pos + 6).toInt();
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting saturation to %d\n", saturation);
         _devices[id].saturation = saturation;
+        strcpy(_devices[id].colormode, "hs");
       }
 printf("Checking CT\n");
       // Colour temperature
@@ -285,6 +288,7 @@ printf("Checking CT\n");
         unsigned int ct = body.substring(pos + 5).toInt();
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting ct to %d\n", ct);
         _devices[id].ct = ct;
+        strcpy(_devices[id].colormode, "ct");
       }
       
 			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+23];
@@ -471,6 +475,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     device.hue = 0;
     device.saturation = 0;
     device.ct = 0;
+    strcpy(device.colormode, "ct");
 
     // create the uniqueid
     String mac = WiFi.macAddress();
