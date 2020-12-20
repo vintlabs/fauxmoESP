@@ -78,7 +78,7 @@ typedef struct {
     char * name;
     bool state;
     unsigned char value;
-    unsigned char hue;
+    unsigned int hue;
     unsigned int saturation;
     unsigned int ct;
     char uniqueid[13];
@@ -102,8 +102,8 @@ class fauxmoESP {
         // These overloaded functions are starting to get ugly....
         bool setState(unsigned char id, bool state, unsigned char value);
         bool setState(const char * device_name, bool state, unsigned char value);
-        bool setState(unsigned char id, bool state, unsigned char hue, unsigned int saturation);
-        bool setState(const char * device_name, bool state, unsigned char value, unsigned int saturation);
+        bool setState(unsigned char id, bool state, unsigned int hue, unsigned int saturation);
+        bool setState(const char * device_name, bool state, unsigned int hue, unsigned int saturation);
                 bool setState(unsigned char id, bool state, unsigned int ct);
         bool setState(const char * device_name, bool state, unsigned int ct);
         bool process(AsyncClient *client, bool isGet, String url, String body);
