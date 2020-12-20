@@ -278,6 +278,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting saturation to %d\n", saturation);
         _devices[id].saturation = saturation;
         strcpy(_devices[id].colormode, "hs");
+        _setRGBFromHSV(id);
       }
 printf("Checking CT\n");
       // Colour temperature
@@ -289,6 +290,7 @@ printf("Checking CT\n");
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting ct to %d\n", ct);
         _devices[id].ct = ct;
         strcpy(_devices[id].colormode, "ct");
+        _setRGBFromCT(id);
       }
       
 			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+23];
@@ -440,6 +442,109 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
     });
     client->close(true);
 
+}
+
+
+
+void fauxmoESP::_setRGBFromHSV(unsigned char id) 
+{
+  if (id < 0) 
+    return;
+    
+  uint8_t r, g, b, h, s, v;
+
+  h = _devices[id].hue;
+  s = _devices[id].saturation;
+  v = _devices[id].value;
+  
+  // this is the algorithm to convert from HSV to RGB
+  h = (h * 192) / 256;  // 0..191
+  unsigned int i = h / 32;   // We want a value of 0 thru 5
+  unsigned int f = (h % 32) * 8;   // 'fractional' part of 'i' 0..248 in jumps
+
+  unsigned int sInv = 255 - s;  // 0 -> 0xff, 0xff -> 0
+  unsigned int fInv = 255 - f;  // 0 -> 0xff, 0xff -> 0
+  byte pv = v * sInv / 256;  // pv will be in range 0 - 255
+  byte qv = v * (256 - s * f / 256) / 256;
+  byte tv = v * (256 - s * fInv / 256) / 256;
+
+  switch (i) {
+  case 0:
+    r = v;
+    g = tv;
+    b = pv;
+    break;
+  case 1:
+    r = qv;
+    g = v;
+    b = pv;
+    break;
+  case 2:
+    r = pv;
+    g = v;
+    b = tv;
+    break;
+  case 3:
+    r = pv;
+    g = qv;
+    b = v;
+    break;
+  case 4:
+    r = tv;
+    g = pv;
+    b = v;
+    break;
+  case 5:
+    r = v;
+    g = pv;
+    b = qv;
+    break;
+  }
+
+  _devices[id].red = r;
+  _devices[id].green = g;
+  _devices[id].blue = b;
+  
+ }
+
+void fauxmoESP::_setRGBFromCT(unsigned char id) 
+{
+  if (id < 0) 
+    return;
+  float temp = 10000.0 / _devices[id].ct;
+  float r, g, b;
+
+  if (temp <= 66)
+  {
+    r = 255;
+    g = 99.470802 * log(temp) - 161.119568;
+
+    if (temp <= 19)
+    {
+      b = 0;
+    }
+    else
+    {
+      b = 138.517731 * log(temp - 10) - 305.044793;
+    }
+  }
+  else
+  {
+    r = 329.698727 * pow(temp - 60, -0.13320476);
+    g = 288.12217 * pow(temp - 60, -0.07551485 );
+    b = 255;
+  }
+
+  r = constrain(r, 0, 255);
+  g = constrain(g, 0, 255);
+  b = constrain(b, 0, 255);
+
+  _devices[id].red = r;
+  _devices[id].green = g;
+  _devices[id].blue = b;
+
+  //printf("RGB %f %f %f\n", r, g, b);    
+   
 }
 
 // -----------------------------------------------------------------------------
@@ -626,63 +731,7 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned int ct) 
 }
 
 
-bool fauxmoESP::setRGBFromHSV(unsigned char id, uint8_t h, uint8_t s, uint8_t v) 
-{
-  if (id < 0) 
-    return false;
-    
-  uint8_t r, g, b;
-  
-  // this is the algorithm to convert from HSV to RGB
-  h = (h * 192) / 256;  // 0..191
-  unsigned int i = h / 32;   // We want a value of 0 thru 5
-  unsigned int f = (h % 32) * 8;   // 'fractional' part of 'i' 0..248 in jumps
 
-  unsigned int sInv = 255 - s;  // 0 -> 0xff, 0xff -> 0
-  unsigned int fInv = 255 - f;  // 0 -> 0xff, 0xff -> 0
-  byte pv = v * sInv / 256;  // pv will be in range 0 - 255
-  byte qv = v * (256 - s * f / 256) / 256;
-  byte tv = v * (256 - s * fInv / 256) / 256;
-
-  switch (i) {
-  case 0:
-    r = v;
-    g = tv;
-    b = pv;
-    break;
-  case 1:
-    r = qv;
-    g = v;
-    b = pv;
-    break;
-  case 2:
-    r = pv;
-    g = v;
-    b = tv;
-    break;
-  case 3:
-    r = pv;
-    g = qv;
-    b = v;
-    break;
-  case 4:
-    r = tv;
-    g = pv;
-    b = v;
-    break;
-  case 5:
-    r = v;
-    g = pv;
-    b = qv;
-    break;
-  }
-
-  _devices[id].red = r;
-  _devices[id].green = g;
-  _devices[id].blue = b;
-  
-  return true;
-}
 
 
 

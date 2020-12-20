@@ -91,20 +91,6 @@ void setup()
       char colormode[3];
       fauxmo.getColormode(device_id, colormode, 3);
       Serial.printf("Colormode: %s\n", colormode);
-
-      if(strcmp(colormode, "hs") == 0)
-      {
-        // Alexa sent an HSV value
-        fauxmo.setRGBFromHSV(device_id, hue, saturation, value);
-      }
-      if(strcmp(colormode, "ct") == 0)    
-      {
-        // Alexa sent colour temperature
-        fauxmo.setRGBFromCT(device_id, ct);
-      }
-      
-      //Serial.printf("An unsupported colormode (%s) was sent by Alexa\n", colormode);
-      
       
       redLed = fauxmo.getRed(device_id);
       greenLed = fauxmo.getGreen(device_id);
@@ -121,14 +107,12 @@ void setup()
       else
       {
         
-        ledcWrite(REDC, redLed);
-        ledcWrite(GREENC, greenLed);
-        ledcWrite(BLUEC, blueLed);
+        ledcWrite(REDC, 0);
+        ledcWrite(GREENC, 0);
+        ledcWrite(BLUEC, 0);
       }
     });
-    //fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
-    //  Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
-    //});
+
     
 }
 

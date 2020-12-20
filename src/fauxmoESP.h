@@ -138,6 +138,9 @@ class fauxmoESP {
 
         String _deviceJson(unsigned char id);
 
+        void _setRGBFromHSV(unsigned char id);
+        void _setRGBFromCT(unsigned char id);
+
         void _handleUDP();
         void _onUDPData(const IPAddress remoteIP, unsigned int remotePort, void *data, size_t len);
         void _sendUDPResponse();
