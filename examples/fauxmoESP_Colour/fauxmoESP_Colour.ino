@@ -18,7 +18,7 @@ fauxmoESP fauxmo;
 
 #define SERIAL_BAUDRATE     115200
 
-#define DEVICE_NAME "Baboon"
+#define DEVICE_NAME "Dingo"
 
 // Set RGB pins
 #define REDPIN 21

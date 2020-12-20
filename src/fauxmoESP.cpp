@@ -254,11 +254,16 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 				unsigned char value = body.substring(pos+5).toInt();
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
+        _setRGBFromHSV(id);
 			} else if (body.indexOf("false") > 0) {
       	_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
-				if (0 == _devices[id].value) _devices[id].value = 254;
+				if (0 == _devices[id].value) 
+				{
+				  _devices[id].value = 254;
+          _setRGBFromHSV(id);
+				}
 			}
 
       // Hue / Saturation
@@ -456,6 +461,16 @@ void fauxmoESP::_setRGBFromHSV(unsigned char id)
   h = _devices[id].hue;
   s = _devices[id].saturation;
   v = _devices[id].value;
+
+
+  // Handle first time turning on with no hue/sat values
+  if ((h == 0) && (s == 0))
+  {
+    _devices[id].red = v;
+    _devices[id].green = v;
+    _devices[id].blue = v; 
+    return;
+  }
   
   // this is the algorithm to convert from HSV to RGB
   h = (h * 192) / 256;  // 0..191
@@ -580,7 +595,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     device.hue = 0;
     device.saturation = 0;
     device.ct = 0;
-    strcpy(device.colormode, "ct");
+    strcpy(device.colormode, "hs");
 
     // create the uniqueid
     String mac = WiFi.macAddress();
@@ -712,8 +727,8 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned int hue,
 // For Colour Temperature (ct)
 bool fauxmoESP::setState(unsigned char id, bool state, unsigned int ct) {
     if (id < _devices.size()) {
-      setRGBFromCT(id, ct);
       _devices[id].ct = ct;
+      _setRGBFromCT(id);
       return true;
   }
   return false;
@@ -723,8 +738,8 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned int ct) 
   int id = getDeviceId(device_name);
   if (id < 0) return false;
   {
-    setRGBFromCT(id, ct);
     _devices[id].ct = ct;
+    _setRGBFromCT(id);
     return true;
   }
   
@@ -732,50 +747,6 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned int ct) 
 
 
 
-
-
-
-// Set RGB from Colour Temperature (ct)
-bool fauxmoESP::setRGBFromCT(unsigned char id, unsigned int ct)
-{
-  if (id < 0) 
-    return false;
-  
-  float temp = 10000.0 / ct;
-  float r, g, b;
-
-  if (temp <= 66)
-  {
-    r = 255;
-    g = 99.470802 * log(temp) - 161.119568;
-
-    if (temp <= 19)
-    {
-      b = 0;
-    }
-    else
-    {
-      b = 138.517731 * log(temp - 10) - 305.044793;
-    }
-  }
-  else
-  {
-    r = 329.698727 * pow(temp - 60, -0.13320476);
-    g = 288.12217 * pow(temp - 60, -0.07551485 );
-    b = 255;
-  }
-
-  r = constrain(r, 0, 255);
-  g = constrain(g, 0, 255);
-  b = constrain(b, 0, 255);
-
-  _devices[id].red = r;
-  _devices[id].green = g;
-  _devices[id].blue = b;
-printf("RGB %f %f %f\n", r, g, b);    
-  return true;
-  
-}
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------
