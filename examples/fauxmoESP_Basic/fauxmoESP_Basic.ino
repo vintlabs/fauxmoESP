@@ -4,7 +4,7 @@
 #else
     #include <ESP8266WiFi.h>
 #endif
-#include "fauxmoESP.h"
+#include <fauxmoESP.h>
 
 // Rename the credentials.sample.h file to credentials.h and 
 // edit it according to your router configuration
@@ -99,13 +99,9 @@ void setup() {
     fauxmo.addDevice(ID_BLUE);
     fauxmo.addDevice(ID_PINK);
     fauxmo.addDevice(ID_WHITE);    
-    fauxmo.addDevice(ID_YELLOW);
-    fauxmo.addDevice(ID_GREEN);
-    fauxmo.addDevice(ID_BLUE);
-    fauxmo.addDevice(ID_PINK);
-    fauxmo.addDevice(ID_WHITE);
+    
 
-    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned char hue, unsigned int saturation, unsigned int ct) {
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned int hue, unsigned int saturation, unsigned int ct) {
         
         // Callback when a command from Alexa is received. 
         // You can use device_id or device_name to choose the element to perform an action onto (relay, LED,...)
