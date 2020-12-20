@@ -47,7 +47,7 @@ THE SOFTWARE.
 #endif
 
 #ifndef DEBUG_FAUXMO_VERBOSE_TCP
-#define DEBUG_FAUXMO_VERBOSE_TCP    true
+#define DEBUG_FAUXMO_VERBOSE_TCP    false
 #endif
 
 #ifndef DEBUG_FAUXMO_VERBOSE_UDP
