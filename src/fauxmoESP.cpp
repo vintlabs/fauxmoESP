@@ -449,77 +449,61 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
 
 }
 
-
-
 void fauxmoESP::_setRGBFromHSV(unsigned char id) 
 {
   if (id < 0) 
     return;
+
+    float dh, ds, dv;
+    dh = _devices[id].hue;
+    ds = _devices[id].saturation;
+    dv = _devices[id].value / 256.0;
+
+    // lifted from https://github.com/Aircoookie/Espalexa/blob/master/src/EspalexaDevice.cpp    
+    float h = ((float)dh)/65536.0;
+    float s = ((float)ds)/255.0;
+    byte i = floor(h*6);
+    float f = h * 6-i;
+    float p = 255 * (1-s);
+    float q = 255 * (1-f*s);
+    float t = 255 * (1-(1-f)*s);
+    switch (i%6) {
+      case 0: 
+        _devices[id].red = 255;
+        _devices[id].green = t;
+        _devices[id].blue = p;
+        break;
+      case 1: 
+        _devices[id].red = q;
+        _devices[id].green = 255;
+        _devices[id].blue = p;
+        break;
+      case 2: 
+        _devices[id].red = p;
+        _devices[id].green = 255;
+        _devices[id].blue = t;
+        break;
+      case 3: 
+        _devices[id].red = p;
+        _devices[id].green = q;
+        _devices[id].blue = 255;
+        break;
+      case 4: 
+        _devices[id].red = t;
+        _devices[id].green = p;
+        _devices[id].blue = 255;
+        break;
+      case 5: 
+        _devices[id].red = 255;
+        _devices[id].green = p;
+        _devices[id].blue = q;
+        break;
+    }
+
+    _devices[id].red = _devices[id].red * dv;
+    _devices[id].green = _devices[id].green * dv;
+    _devices[id].blue = _devices[id].blue * dv;
     
-  uint8_t r, g, b, h, s, v;
-
-  h = _devices[id].hue;
-  s = _devices[id].saturation;
-  v = _devices[id].value;
-
-
-  // Handle first time turning on with no hue/sat values
-  if ((h == 0) && (s == 0))
-  {
-    _devices[id].red = v;
-    _devices[id].green = v;
-    _devices[id].blue = v; 
-    return;
-  }
-  
-  // this is the algorithm to convert from HSV to RGB
-  h = (h * 192) / 256;  // 0..191
-  unsigned int i = h / 32;   // We want a value of 0 thru 5
-  unsigned int f = (h % 32) * 8;   // 'fractional' part of 'i' 0..248 in jumps
-
-  unsigned int sInv = 255 - s;  // 0 -> 0xff, 0xff -> 0
-  unsigned int fInv = 255 - f;  // 0 -> 0xff, 0xff -> 0
-  byte pv = v * sInv / 256;  // pv will be in range 0 - 255
-  byte qv = v * (256 - s * f / 256) / 256;
-  byte tv = v * (256 - s * fInv / 256) / 256;
-
-  switch (i) {
-  case 0:
-    r = v;
-    g = tv;
-    b = pv;
-    break;
-  case 1:
-    r = qv;
-    g = v;
-    b = pv;
-    break;
-  case 2:
-    r = pv;
-    g = v;
-    b = tv;
-    break;
-  case 3:
-    r = pv;
-    g = qv;
-    b = v;
-    break;
-  case 4:
-    r = tv;
-    g = pv;
-    b = v;
-    break;
-  case 5:
-    r = v;
-    g = pv;
-    b = qv;
-    break;
-  }
-
-  _devices[id].red = r;
-  _devices[id].green = g;
-  _devices[id].blue = b;
-  
  }
 
 void fauxmoESP::_setRGBFromCT(unsigned char id) 

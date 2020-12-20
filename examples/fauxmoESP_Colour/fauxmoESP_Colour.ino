@@ -84,7 +84,7 @@ void setup()
 
     //fauxmo.setState((unsigned char) 0, (bool) 1, (unsigned char) 254);
 
-    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned char hue, unsigned int saturation, unsigned int ct) 
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned int hue, unsigned int saturation, unsigned int ct) 
     {
       Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d hue: %u saturation: %u ct: %u\n", device_id, device_name, state ? "ON" : "OFF", value, hue, saturation, ct);
 

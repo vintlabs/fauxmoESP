@@ -72,7 +72,7 @@ THE SOFTWARE.
 #include <MD5Builder.h>
 #include "templates.h"
 
-typedef std::function<void(unsigned char, const char *, bool, unsigned char, unsigned char, unsigned int, unsigned int)> TSetStateCallback;
+typedef std::function<void(unsigned char, const char *, bool, unsigned char, unsigned int, unsigned int, unsigned int)> TSetStateCallback;
 
 typedef struct {
     char * name;
