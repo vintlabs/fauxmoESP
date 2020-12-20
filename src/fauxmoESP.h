@@ -82,6 +82,7 @@ typedef struct {
     unsigned int saturation;
     unsigned int ct;
     char colormode[3];  // This might have to change to an enum 
+    unsigned char red, green, blue;
     char uniqueid[13];
 } fauxmoesp_device_t;
 
@@ -105,8 +106,16 @@ class fauxmoESP {
         bool setState(const char * device_name, bool state, unsigned char value);
         bool setState(unsigned char id, bool state, unsigned int hue, unsigned int saturation);
         bool setState(const char * device_name, bool state, unsigned int hue, unsigned int saturation);
-                bool setState(unsigned char id, bool state, unsigned int ct);
+        bool setState(unsigned char id, bool state, unsigned int ct);
         bool setState(const char * device_name, bool state, unsigned int ct);
+        bool setRGBFromCT(unsigned char id, unsigned int ct);
+        bool setRGBFromHSV(unsigned char id, uint8_t h, uint8_t s, uint8_t v);
+
+        uint8_t getRed(unsigned char id);
+        uint8_t getGreen(unsigned char id);
+        uint8_t getBlue(unsigned char id);
+        char * getColormode(unsigned char id, char * buffer, size_t len);
+
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }

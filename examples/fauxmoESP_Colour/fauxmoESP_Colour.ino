@@ -5,7 +5,7 @@
     #include <ESP8266WiFi.h>
 #endif
 
-#include <fauxmoESP.h>
+#include "fauxmoESP.h"
 
 // Rename the credentials.sample.h file to credentials.h and 
 // edit it according to your router configuration
@@ -62,53 +62,6 @@ uint8_t redLed;
 uint8_t greenLed;
 uint8_t blueLed;
 
-void setLedColorHSV(uint8_t h, uint8_t s, uint8_t v) {
-  // this is the algorithm to convert from RGB to HSV
-  h = (h * 192) / 256;  // 0..191
-  unsigned int i = h / 32;   // We want a value of 0 thru 5
-  unsigned int f = (h % 32) * 8;   // 'fractional' part of 'i' 0..248 in jumps
-
-  unsigned int sInv = 255 - s;  // 0 -> 0xff, 0xff -> 0
-  unsigned int fInv = 255 - f;  // 0 -> 0xff, 0xff -> 0
-  byte pv = v * sInv / 256;  // pv will be in range 0 - 255
-  byte qv = v * (256 - s * f / 256) / 256;
-  byte tv = v * (256 - s * fInv / 256) / 256;
-
-  switch (i) {
-  case 0:
-    redLed = v;
-    greenLed = tv;
-    blueLed = pv;
-    break;
-  case 1:
-    redLed = qv;
-    greenLed = v;
-    blueLed = pv;
-    break;
-  case 2:
-    redLed = pv;
-    greenLed = v;
-    blueLed = tv;
-    break;
-  case 3:
-    redLed = pv;
-    greenLed = qv;
-    blueLed = v;
-    break;
-  case 4:
-    redLed = tv;
-    greenLed = pv;
-    blueLed = v;
-    break;
-  case 5:
-    redLed = v;
-    greenLed = pv;
-    blueLed = qv;
-    break;
-  }
-}
-
-
 
 void setup() 
 {
@@ -135,7 +88,28 @@ void setup()
     {
       Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d hue: %u saturation: %u ct: %u\n", device_id, device_name, state ? "ON" : "OFF", value, hue, saturation, ct);
 
-      setLedColorHSV(hue, saturation, value);
+      char colormode[3];
+      fauxmo.getColormode(device_id, colormode, 3);
+      Serial.printf("Colormode: %s\n", colormode);
+
+      if(strcmp(colormode, "hs") == 0)
+      {
+        // Alexa sent an HSV value
+        fauxmo.setRGBFromHSV(device_id, hue, saturation, value);
+      }
+      if(strcmp(colormode, "ct") == 0)    
+      {
+        // Alexa sent colour temperature
+        fauxmo.setRGBFromCT(device_id, ct);
+      }
+      
+      //Serial.printf("An unsupported colormode (%s) was sent by Alexa\n", colormode);
+      
+      
+      redLed = fauxmo.getRed(device_id);
+      greenLed = fauxmo.getGreen(device_id);
+      blueLed = fauxmo.getBlue(device_id);
+      
       Serial.printf("HSV: %d %d %d  RGB: %d %d %d\n", hue, saturation, value, redLed, greenLed, blueLed);
       
       if (state)
