@@ -258,7 +258,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
       	_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
-				if (0 == _devices[id].value) _devices[id].value = 255;
+				if (0 == _devices[id].value) _devices[id].value = 254;
 			}
 
       // Hue / Saturation

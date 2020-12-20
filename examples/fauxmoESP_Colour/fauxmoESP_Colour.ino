@@ -1,0 +1,163 @@
+#include <Arduino.h>
+#ifdef ESP32
+    #include <WiFi.h>
+#else
+    #include <ESP8266WiFi.h>
+#endif
+
+#include <fauxmoESP.h>
+
+// Rename the credentials.sample.h file to credentials.h and 
+// edit it according to your router configuration
+#include "credentials.h"
+// or alternately set SSID and passphrase below
+//#define WIFI_SSID "----"
+//#define WIFI_PASS "----"
+
+fauxmoESP fauxmo;
+
+#define SERIAL_BAUDRATE     115200
+
+#define DEVICE_NAME "Baboon"
+
+// Set RGB pins
+#define REDPIN 21
+#define GREENPIN 22
+#define BLUEPIN 23
+// LED channels
+#define REDC 1
+#define GREENC 2
+#define BLUEC 3
+
+
+// -----------------------------------------------------------------------------
+// Wifi
+// -----------------------------------------------------------------------------
+
+void wifiSetup() {
+
+    // Set WIFI module to STA mode
+    WiFi.mode(WIFI_STA);
+
+    // Connect
+    Serial.printf("[WIFI] Connecting to %s ", WIFI_SSID);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+    // Wait
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(100);
+    }
+    Serial.println();
+
+    // Connected!
+    Serial.printf("[WIFI] STATION Mode, SSID: %s, IP address: %s\n", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
+
+}
+
+
+
+// HSV-RGB stuff 
+uint8_t redLed;
+uint8_t greenLed;
+uint8_t blueLed;
+
+void setLedColorHSV(uint8_t h, uint8_t s, uint8_t v) {
+  // this is the algorithm to convert from RGB to HSV
+  h = (h * 192) / 256;  // 0..191
+  unsigned int i = h / 32;   // We want a value of 0 thru 5
+  unsigned int f = (h % 32) * 8;   // 'fractional' part of 'i' 0..248 in jumps
+
+  unsigned int sInv = 255 - s;  // 0 -> 0xff, 0xff -> 0
+  unsigned int fInv = 255 - f;  // 0 -> 0xff, 0xff -> 0
+  byte pv = v * sInv / 256;  // pv will be in range 0 - 255
+  byte qv = v * (256 - s * f / 256) / 256;
+  byte tv = v * (256 - s * fInv / 256) / 256;
+
+  switch (i) {
+  case 0:
+    redLed = v;
+    greenLed = tv;
+    blueLed = pv;
+    break;
+  case 1:
+    redLed = qv;
+    greenLed = v;
+    blueLed = pv;
+    break;
+  case 2:
+    redLed = pv;
+    greenLed = v;
+    blueLed = tv;
+    break;
+  case 3:
+    redLed = pv;
+    greenLed = qv;
+    blueLed = v;
+    break;
+  case 4:
+    redLed = tv;
+    greenLed = pv;
+    blueLed = v;
+    break;
+  case 5:
+    redLed = v;
+    greenLed = pv;
+    blueLed = qv;
+    break;
+  }
+}
+
+
+
+void setup() 
+{
+    Serial.begin(SERIAL_BAUDRATE);
+
+    // Wifi
+    wifiSetup();
+
+    fauxmo.setPort(80); // This is required for gen3 devices
+    fauxmo.enable(true);
+    fauxmo.addDevice(DEVICE_NAME);  
+
+    // LED strip testing
+    ledcAttachPin(REDPIN, REDC);
+    ledcAttachPin(GREENPIN, GREENC);
+    ledcAttachPin(BLUEPIN, BLUEC);
+    ledcSetup(REDC, 12000, 8);  // 12kHz 8 bit
+    ledcSetup(GREENC, 12000, 8);
+    ledcSetup(BLUEC, 12000, 8);
+
+    //fauxmo.setState((unsigned char) 0, (bool) 1, (unsigned char) 254);
+
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned char hue, unsigned int saturation, unsigned int ct) 
+    {
+      Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d hue: %u saturation: %u ct: %u\n", device_id, device_name, state ? "ON" : "OFF", value, hue, saturation, ct);
+
+      setLedColorHSV(hue, saturation, value);
+      Serial.printf("HSV: %d %d %d  RGB: %d %d %d\n", hue, saturation, value, redLed, greenLed, blueLed);
+      
+      if (state)
+      {
+        ledcWrite(REDC, redLed);
+        ledcWrite(GREENC, greenLed);
+        ledcWrite(BLUEC, blueLed);
+      }
+      else
+      {
+        
+        ledcWrite(REDC, redLed);
+        ledcWrite(GREENC, greenLed);
+        ledcWrite(BLUEC, blueLed);
+      }
+    });
+    //fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+    //  Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+    //});
+    
+}
+
+void loop() {
+    fauxmo.handle();
+}
