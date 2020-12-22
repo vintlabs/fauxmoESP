@@ -3,6 +3,10 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2] 2020-12-22
+### Changed
+Fixed modelid so devices properly show as a light in the Alexa App
+
 ## [3.1.2] 2020-12-08
 ### Changed
 - Changed `uniqueid` to fix Alexa discovery issue 
