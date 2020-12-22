@@ -25,6 +25,8 @@ We now have a place for general discussion, ideas, projects etc. - https://githu
 
 ## History
 
+2020-12-22 Version 3.2 released. Devices now show properly in the Alexa App as a bulb.
+
 2020-12-08 Version 3.1.2 released. New version available in Arduino Library Manager or at https://github.com/vintlabs/fauxmoESP/releases/tag/3.1.2  PlatformIO is still pending update.
 
 Before version 3.0.0, the library used a different protocol (emulating Belkin Wemo devices). The library was a port of Maker Musings' [Fauxmo Python library][6] to the ESP8266 platform. Support for ESP32 and Gen2 devices was added by Frank Hellmann <frank at vfx dot to> and Bibi Blocksberg respectively.
