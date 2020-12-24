@@ -63,7 +63,7 @@ You can look for it manually but I have gathered the URL here for convenience:
 
 The library is very easy to use, basically instantiate an object, connect to the Wifi, add one or more virtual devices and bind the callback to get the messages. An schematic example could be:
 
-```
+```C
 #include <fauxmoESP.h>
 
 fauxmoESP fauxmo;
