@@ -2,7 +2,7 @@
 
 FAUXMO ESP
 
-Copyright (C) 2018-2020 by Xose Pérez <xose dot perez at gmail dot com>
+Copyright (C) 2018-2020 by Xose Pérez <xose dot perez at gmail dot com>, 2020-2021 by Paul Vint <paul@vintlabs.com>
 
 The MIT License (MIT)
 
