@@ -107,13 +107,13 @@ Then run the "discover devices" option from your Alexa app or web (in the Smart 
 
 Current status of the library:
 
-|Platform|Gen1|Gen2|Gen3|
-|---|---|---|---|
-|ESP8266 Core 2.3.X|OK|OK?|OK (1)|
-|ESP8266 Core 2.4.0|OK (2)|OK? (2)|OK (1, 2)|
-|ESP8266 Core 2.4.1|OK (2)|OK? (2)|OK (1, 2)|
-|ESP8266 Core 2.4.2|OK (2)|OK? (2)|OK (1, 2)|
-|ESP32|OK|OK?|OK (1)|
+|Platform|Gen1|Gen2|Gen3|Gen4|
+|---|---|---|---|---|
+|ESP8266 Core 2.3.X|OK|OK?|OK (1)|?|
+|ESP8266 Core 2.4.0|OK (2)|OK? (2)|OK (1, 2)|?|
+|ESP8266 Core 2.4.1|OK (2)|OK? (2)|OK (1, 2)|?|
+|ESP8266 Core 2.4.2|OK (2)|OK? (2)|OK (1, 2)|?|
+|ESP32|OK|OK?|OK (1)|OK (1)|
 
 (1) When using gen3 devices TCP port must be 80 always.
 (2) Arduino Core for ESP8266 requires LwIP set to "v1.4 Higher Bandwidth".
