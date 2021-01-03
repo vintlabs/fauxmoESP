@@ -137,6 +137,7 @@ class fauxmoESP {
         String _deviceJson(unsigned char id);
 
         void _setRGBFromHSV(unsigned char id);
+        void _adjustRGBFromValue(unsigned char id);
         void _setRGBFromCT(unsigned char id);
 
         void _handleUDP();

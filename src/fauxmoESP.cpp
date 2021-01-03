@@ -248,15 +248,18 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 
 			--id;
 
+        Serial.printf("[Previous values: RGB: %d %d %d HSV: %d %d %d\n", _devices[id].red, _devices[id].green, _devices[id].blue,_devices[id].hue, _devices[id].saturation, _devices[id].value);
+
 			// Brightness
 			pos = body.indexOf("bri");
 			if (pos > 0) {
+				Serial.printf("****************\n%s*****************\n", body.c_str());
 				unsigned char value = body.substring(pos+5).toInt();
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
-        _setRGBFromHSV(id);
+				_adjustRGBFromValue(id);
 			} else if (body.indexOf("false") > 0) {
-      	_devices[id].state = false;
+				_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
 				if (0 == _devices[id].value) 
@@ -447,6 +450,30 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
     });
     client->close(true);
 
+}
+
+void fauxmoESP::_adjustRGBFromValue(unsigned char id) 
+{
+	if (id < 0) 
+		return;
+
+	// Get the greatest of the RGB values
+	uint8_t largest = (_devices[id].red > _devices[id].green) ? _devices[id].red : _devices[id].green;
+	largest = (_devices[id].blue > largest) ? _devices[id].blue : largest;
+
+	if (largest > 0)
+	{
+		float factor = (float) _devices[id].value / (float) largest;
+		_devices[id].red *= factor;
+		_devices[id].green *= factor;
+		_devices[id].blue *= factor;
+	}
+	else
+	{
+		_devices[id].red = 0;
+		_devices[id].green = 0;
+		_devices[id].blue = 0;
+	}
 }
 
 void fauxmoESP::_setRGBFromHSV(unsigned char id) 
