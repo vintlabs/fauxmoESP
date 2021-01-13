@@ -18,7 +18,7 @@ fauxmoESP fauxmo;
 
 #define SERIAL_BAUDRATE     115200
 
-#define DEVICE_NAME "Dingo"
+#define DEVICE_NAME "LED Test"
 
 // Set RGB pins
 #define REDPIN 21
@@ -74,15 +74,15 @@ void setup()
     fauxmo.enable(true);
     fauxmo.addDevice(DEVICE_NAME);  
 
-    // LED strip testing
-    ledcAttachPin(REDPIN, REDC);
-    ledcAttachPin(GREENPIN, GREENC);
-    ledcAttachPin(BLUEPIN, BLUEC);
-    ledcSetup(REDC, 12000, 8);  // 12kHz 8 bit
-    ledcSetup(GREENC, 12000, 8);
-    ledcSetup(BLUEC, 12000, 8);
-
-    //fauxmo.setState((unsigned char) 0, (bool) 1, (unsigned char) 254);
+    // LED strip testing - ledc only works for ESP32
+#ifdef ESP32
+	    ledcAttachPin(REDPIN, REDC);
+	    ledcAttachPin(GREENPIN, GREENC);
+	    ledcAttachPin(BLUEPIN, BLUEC);
+	    ledcSetup(REDC, 12000, 8);  // 12kHz 8 bit
+	    ledcSetup(GREENC, 12000, 8);
+	    ledcSetup(BLUEC, 12000, 8);
+#endif
 
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned int hue, unsigned int saturation, unsigned int ct) 
     {
@@ -98,6 +98,7 @@ void setup()
       
       Serial.printf("HSV: %d %d %d  RGB: %d %d %d\n", hue, saturation, value, redLed, greenLed, blueLed);
       
+#ifdef ESP32
       if (state)
       {
         ledcWrite(REDC, redLed);
@@ -111,6 +112,7 @@ void setup()
         ledcWrite(GREENC, 0);
         ledcWrite(BLUEC, 0);
       }
+#endif
     });
 
     

@@ -248,12 +248,11 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 
 			--id;
 
-        Serial.printf("[Previous values: RGB: %d %d %d HSV: %d %d %d\n", _devices[id].red, _devices[id].green, _devices[id].blue,_devices[id].hue, _devices[id].saturation, _devices[id].value);
+        		//Serial.printf("[Previous values: RGB: %d %d %d HSV: %d %d %d\n", _devices[id].red, _devices[id].green, _devices[id].blue,_devices[id].hue, _devices[id].saturation, _devices[id].value);
 
 			// Brightness
 			pos = body.indexOf("bri");
 			if (pos > 0) {
-				Serial.printf("****************\n%s*****************\n", body.c_str());
 				unsigned char value = body.substring(pos+5).toInt();
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
@@ -265,7 +264,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 				if (0 == _devices[id].value) 
 				{
 				  _devices[id].value = 254;
-          _setRGBFromHSV(id);
+				  _setRGBFromHSV(id);
 				}
 			}
 
@@ -288,12 +287,11 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
         strcpy(_devices[id].colormode, "hs");
         _setRGBFromHSV(id);
       }
-printf("Checking CT\n");
+
       // Colour temperature
       pos = body.indexOf("\"ct\"");
       if (pos > 0)
       {
-        //printf("Found CT\n");
         unsigned int ct = body.substring(pos + 5).toInt();
         DEBUG_MSG_FAUXMO("[FAUXMO] Setting ct to %d\n", ct);
         _devices[id].ct = ct;
