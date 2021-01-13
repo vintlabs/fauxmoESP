@@ -124,7 +124,9 @@ String fauxmoESP::_deviceJson(unsigned char id) {
         FAUXMO_DEVICE_JSON_TEMPLATE,
         device.name, device.uniqueid,
         device.state ? "true": "false",
-        device.value
+        device.value, device.colormode,
+        device.hue, device.saturation, 
+        device.ct
     );
 
 	return String(buffer);
@@ -246,29 +248,68 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 
 			--id;
 
+        		//Serial.printf("[Previous values: RGB: %d %d %d HSV: %d %d %d\n", _devices[id].red, _devices[id].green, _devices[id].blue,_devices[id].hue, _devices[id].saturation, _devices[id].value);
+
 			// Brightness
 			pos = body.indexOf("bri");
 			if (pos > 0) {
 				unsigned char value = body.substring(pos+5).toInt();
 				_devices[id].value = value;
 				_devices[id].state = (value > 0);
+				_adjustRGBFromValue(id);
 			} else if (body.indexOf("false") > 0) {
 				_devices[id].state = false;
 			} else {
 				_devices[id].state = true;
-				if (0 == _devices[id].value) _devices[id].value = 255;
+				if (0 == _devices[id].value) 
+				{
+				  _devices[id].value = 254;
+				  _setRGBFromHSV(id);
+				}
 			}
 
-			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+10];
+      // Hue / Saturation
+      pos = body.indexOf("hue");
+      if (pos > 0)
+      {
+        unsigned int hue = body.substring(pos + 5).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting hue to %d\n", hue);
+        _devices[id].hue = hue;
+        strcpy(_devices[id].colormode, "hs");
+      }
+      
+      pos = body.indexOf("\"sat\"");
+      if (pos > 0)
+      {
+        unsigned char saturation = body.substring(pos + 6).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting saturation to %d\n", saturation);
+        _devices[id].saturation = saturation;
+        strcpy(_devices[id].colormode, "hs");
+        _setRGBFromHSV(id);
+      }
+
+      // Colour temperature
+      pos = body.indexOf("\"ct\"");
+      if (pos > 0)
+      {
+        unsigned int ct = body.substring(pos + 5).toInt();
+        DEBUG_MSG_FAUXMO("[FAUXMO] Setting ct to %d\n", ct);
+        _devices[id].ct = ct;
+        strcpy(_devices[id].colormode, "ct");
+        _setRGBFromCT(id);
+      }
+      
+			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+23];
 			snprintf_P(
 				response, sizeof(response),
 				FAUXMO_TCP_STATE_RESPONSE,
-				id+1, _devices[id].state ? "true" : "false", id+1, _devices[id].value
+				id+1, _devices[id].state ? "true" : "false", id+1, _devices[id].value, id+1, _devices[id].hue, id+1, _devices[id].saturation, id+1,  _devices[id].ct
 			);
+      //DEBUG_MSG_FAUXMO("[FAUXMO] Sending state response:\n%s\n", response);
 			_sendTCPResponse(client, "200 OK", response, "text/xml");
 
 			if (_setCallback) {
-				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value);
+				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value, _devices[id].hue, _devices[id].saturation, _devices[id].ct);
 			}
 
 			return true;
@@ -409,6 +450,127 @@ void fauxmoESP::_onTCPClient(AsyncClient *client) {
 
 }
 
+void fauxmoESP::_adjustRGBFromValue(unsigned char id) 
+{
+	if (id < 0) 
+		return;
+
+	// Get the greatest of the RGB values
+	uint8_t largest = (_devices[id].red > _devices[id].green) ? _devices[id].red : _devices[id].green;
+	largest = (_devices[id].blue > largest) ? _devices[id].blue : largest;
+
+	if (largest > 0)
+	{
+		float factor = (float) _devices[id].value / (float) largest;
+		_devices[id].red *= factor;
+		_devices[id].green *= factor;
+		_devices[id].blue *= factor;
+	}
+	else
+	{
+		_devices[id].red = 0;
+		_devices[id].green = 0;
+		_devices[id].blue = 0;
+	}
+}
+
+void fauxmoESP::_setRGBFromHSV(unsigned char id) 
+{
+  if (id < 0) 
+    return;
+
+    float dh, ds, dv;
+    dh = _devices[id].hue;
+    ds = _devices[id].saturation;
+    dv = _devices[id].value / 256.0;
+
+    // lifted from https://github.com/Aircoookie/Espalexa/blob/master/src/EspalexaDevice.cpp    
+    float h = ((float)dh)/65536.0;
+    float s = ((float)ds)/255.0;
+    byte i = floor(h*6);
+    float f = h * 6-i;
+    float p = 255 * (1-s);
+    float q = 255 * (1-f*s);
+    float t = 255 * (1-(1-f)*s);
+    switch (i%6) {
+      case 0: 
+        _devices[id].red = 255;
+        _devices[id].green = t;
+        _devices[id].blue = p;
+        break;
+      case 1: 
+        _devices[id].red = q;
+        _devices[id].green = 255;
+        _devices[id].blue = p;
+        break;
+      case 2: 
+        _devices[id].red = p;
+        _devices[id].green = 255;
+        _devices[id].blue = t;
+        break;
+      case 3: 
+        _devices[id].red = p;
+        _devices[id].green = q;
+        _devices[id].blue = 255;
+        break;
+      case 4: 
+        _devices[id].red = t;
+        _devices[id].green = p;
+        _devices[id].blue = 255;
+        break;
+      case 5: 
+        _devices[id].red = 255;
+        _devices[id].green = p;
+        _devices[id].blue = q;
+        break;
+    }
+
+    _devices[id].red = _devices[id].red * dv;
+    _devices[id].green = _devices[id].green * dv;
+    _devices[id].blue = _devices[id].blue * dv;
+    
+ }
+
+void fauxmoESP::_setRGBFromCT(unsigned char id) 
+{
+  if (id < 0) 
+    return;
+  float temp = 10000.0 / _devices[id].ct;
+  float r, g, b;
+
+  if (temp <= 66)
+  {
+    r = 255;
+    g = 99.470802 * log(temp) - 161.119568;
+
+    if (temp <= 19)
+    {
+      b = 0;
+    }
+    else
+    {
+      b = 138.517731 * log(temp - 10) - 305.044793;
+    }
+  }
+  else
+  {
+    r = 329.698727 * pow(temp - 60, -0.13320476);
+    g = 288.12217 * pow(temp - 60, -0.07551485 );
+    b = 255;
+  }
+
+  r = constrain(r, 0, 255);
+  g = constrain(g, 0, 255);
+  b = constrain(b, 0, 255);
+
+  _devices[id].red = r;
+  _devices[id].green = g;
+  _devices[id].blue = b;
+
+  //printf("RGB %f %f %f\n", r, g, b);    
+   
+}
+
 // -----------------------------------------------------------------------------
 // Devices
 // -----------------------------------------------------------------------------
@@ -439,6 +601,10 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     device.name = strdup(device_name);
   	device.state = false;
 	  device.value = 0;
+    device.hue = 0;
+    device.saturation = 0;
+    device.ct = 0;
+    strcpy(device.colormode, "hs");
 
     // create the uniqueid
     String mac = WiFi.macAddress();
@@ -508,6 +674,30 @@ char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len
     return device_name;
 }
 
+char * fauxmoESP::getColormode(unsigned char id, char * cm, size_t len)
+{
+   if (id < _devices.size())
+   {
+      strncpy(cm, _devices[id].colormode, len);
+   }
+   
+   return cm;
+}
+
+uint8_t fauxmoESP::getRed(unsigned char id)
+{
+  return _devices[id].red;
+}
+uint8_t fauxmoESP::getGreen(unsigned char id)
+{
+  return _devices[id].green;
+}
+uint8_t fauxmoESP::getBlue(unsigned char id)
+{
+  return _devices[id].blue;
+}
+
+// For on/off and Brightness
 bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value) {
     if (id < _devices.size()) {
 		_devices[id].state = state;
@@ -524,6 +714,47 @@ bool fauxmoESP::setState(const char * device_name, bool state, unsigned char val
 	_devices[id].value = value;
 	return true;
 }
+
+// For hue / Saturation
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned int hue, unsigned int saturation) {
+    if (id < _devices.size()) {
+      _devices[id].hue = hue;
+      _devices[id].saturation = saturation;
+    return true;
+  }
+  return false;
+}
+
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned int hue, unsigned int saturation) {
+  int id = getDeviceId(device_name);
+  if (id < 0) return false;
+    _devices[id].hue = hue;
+    _devices[id].saturation = saturation;
+  return true;
+}
+
+// For Colour Temperature (ct)
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned int ct) {
+    if (id < _devices.size()) {
+      _devices[id].ct = ct;
+      _setRGBFromCT(id);
+      return true;
+  }
+  return false;
+}
+
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned int ct) {
+  int id = getDeviceId(device_name);
+  if (id < 0) return false;
+  {
+    _devices[id].ct = ct;
+    _setRGBFromCT(id);
+    return true;
+  }
+  
+}
+
+
 
 // -----------------------------------------------------------------------------
 // Public API

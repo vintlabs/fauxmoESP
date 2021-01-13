@@ -4,7 +4,7 @@
 #else
     #include <ESP8266WiFi.h>
 #endif
-#include "fauxmoESP.h"
+#include <fauxmoESP.h>
 
 // Rename the credentials.sample.h file to credentials.h and 
 // edit it according to your router configuration
@@ -98,9 +98,10 @@ void setup() {
     fauxmo.addDevice(ID_GREEN);
     fauxmo.addDevice(ID_BLUE);
     fauxmo.addDevice(ID_PINK);
-    fauxmo.addDevice(ID_WHITE);
+    fauxmo.addDevice(ID_WHITE);    
+    
 
-    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value) {
+    fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned int hue, unsigned int saturation, unsigned int ct) {
         
         // Callback when a command from Alexa is received. 
         // You can use device_id or device_name to choose the element to perform an action onto (relay, LED,...)
@@ -108,7 +109,7 @@ void setup() {
         // Just remember not to delay too much here, this is a callback, exit as soon as possible.
         // If you have to do something more involved here set a flag and process it in your main loop.
         
-        Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+        Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d hue: %d saturation: %u ct: %u\n", device_id, device_name, state ? "ON" : "OFF", value, hue, saturation, ct);
 
         // Checking for device_id is simpler if you are certain about the order they are loaded and it does not change.
         // Otherwise comparing the device_name is safer.
