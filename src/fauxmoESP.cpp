@@ -248,7 +248,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 
 		// Get the index
 		unsigned char id = url.substring(pos+7).toInt();
-		if (id > 0) 
+		if (id > 0 && id <= _devices.size()) 
 		{
 			--id;
 
