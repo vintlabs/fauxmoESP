@@ -59,7 +59,7 @@ void fauxmoESP::_sendUDPResponse() {
 	#if defined(ESP32)
 	    _udp.printf(response);
 	#else
-	    _udp.write(response);
+	    _udp.write(response, sizeof(response));
 	#endif
 	_udp.endPacket();
 
