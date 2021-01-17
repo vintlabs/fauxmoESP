@@ -4,7 +4,7 @@
 #else
     #include <ESP8266WiFi.h>
 #endif
-#include <fauxmoESP.h>
+#include "fauxmoESP.h"
 
 // Rename the credentials.sample.h file to credentials.h and 
 // edit it according to your router configuration
@@ -93,12 +93,12 @@ void setup() {
     // "Alexa, turn on yellow lamp
     // "Alexa, set yellow lamp to fifty" (50 means 50% of brightness, note, this example does not use this functionality)
 
-    // Add virtual devices
+    // Add virtual devices - Note that many users have problems on ESP8266 with more than three devices
     fauxmo.addDevice(ID_YELLOW);
     fauxmo.addDevice(ID_GREEN);
     fauxmo.addDevice(ID_BLUE);
-    fauxmo.addDevice(ID_PINK);
-    fauxmo.addDevice(ID_WHITE);    
+    //fauxmo.addDevice(ID_PINK);
+    //fauxmo.addDevice(ID_WHITE);    
     
 
     fauxmo.onSetState([](unsigned char device_id, const char * device_name, bool state, unsigned char value, unsigned int hue, unsigned int saturation, unsigned int ct) {
