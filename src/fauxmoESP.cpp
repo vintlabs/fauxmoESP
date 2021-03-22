@@ -442,15 +442,9 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     // create the uniqueid
     String mac = WiFi.macAddress();
-    mac.replace(":", "");
-    mac.toLowerCase();
 
-    // To create the uniqueID, we use the device's MAC, add the device name
-    // then use a truncated MD5 hash to create an ID that is unique and repeatable
-    mac.concat(device.name); 
-    String hash = _makeMD5(mac).substring(0,FAUXMO_DEVICE_UNIQUE_ID_LENGTH);  
-    strcpy(device.uniqueid, hash.c_str());
-    
+    snprintf(device.uniqueid, 27, "%s:%s-%02X", mac.c_str(), "00:00", device_id);
+
     // Attach
     _devices.push_back(device);
 
