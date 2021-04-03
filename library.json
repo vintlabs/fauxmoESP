@@ -6,7 +6,7 @@
         "type": "git",
         "url": "https://github.com/vintlabs/fauxmoESP"
     },
-    "version": "3.3",
+    "version": "3.4",
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
