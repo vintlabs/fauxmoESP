@@ -118,7 +118,7 @@ class fauxmoESP {
         AsyncClient * _tcpClients[FAUXMO_TCP_MAX_CLIENTS];
         TSetStateCallback _setCallback = NULL;
 
-        String _deviceJson(unsigned char id);
+        String _deviceJson(unsigned char id, bool all); 	// all = true means we are listing all devices so use full description template
 
         void _handleUDP();
         void _onUDPData(const IPAddress remoteIP, unsigned int remotePort, void *data, size_t len);

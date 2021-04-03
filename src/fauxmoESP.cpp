@@ -111,24 +111,35 @@ void fauxmoESP::_sendTCPResponse(AsyncClient *client, const char * code, char * 
 
 }
 
-String fauxmoESP::_deviceJson(unsigned char id) {
+String fauxmoESP::_deviceJson(unsigned char id, bool all = true) {
 
 	if (id >= _devices.size()) return "{}";
 
 	fauxmoesp_device_t device = _devices[id];
 
-  DEBUG_MSG_FAUXMO("[FAUXMO] Sending device info for \"%s\", uniqueID = \"%s\"\n", device.name, device.uniqueid);
-  char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
-  snprintf_P(
-        buffer, sizeof(buffer),
-        FAUXMO_DEVICE_JSON_TEMPLATE,
-        device.name, device.uniqueid,
-        device.state ? "true": "false",
-        device.value
-    );
+	DEBUG_MSG_FAUXMO("[FAUXMO] Sending device info for \"%s\", uniqueID = \"%s\"\n", device.name, device.uniqueid);
+	char buffer[strlen_P(FAUXMO_DEVICE_JSON_TEMPLATE) + 64];
+
+	if (all)
+	{
+		snprintf_P(
+			buffer, sizeof(buffer),
+			FAUXMO_DEVICE_JSON_TEMPLATE,
+			device.name, device.uniqueid,
+			device.state ? "true": "false",
+			device.value
+		);
+	}
+	else
+	{
+		snprintf_P(
+			buffer, sizeof(buffer),
+			FAUXMO_DEVICE_JSON_TEMPLATE_SHORT,
+			device.name, device.uniqueid
+		);
+	}
 
 	return String(buffer);
-
 }
 
 String fauxmoESP::_byte2hex(uint8_t zahl)
@@ -207,7 +218,7 @@ bool fauxmoESP::_onTCPList(AsyncClient *client, String url, String body) {
 		response += "{";
 		for (unsigned char i=0; i< _devices.size(); i++) {
 			if (i>0) response += ",";
-			response += "\"" + String(i+1) + "\":" + _deviceJson(i);
+			response += "\"" + String(i+1) + "\":" + _deviceJson(i, false);	// send short template
 		}
 		response += "}";
 
