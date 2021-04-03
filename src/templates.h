@@ -66,6 +66,15 @@ PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
     "\"swversion\": \"5.105.0.21169\""
 "}";
 
+// Use shorter description template when listing all devices
+PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE_SHORT[] = "{"
+    "\"type\": \"Extended color light\","
+    "\"name\": \"%s\","
+    "\"uniqueid\": \"%s\""
+
+"}";
+
+
 PROGMEM const char FAUXMO_DESCRIPTION_TEMPLATE[] =
 "<?xml version=\"1.0\" ?>"
 "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">"
