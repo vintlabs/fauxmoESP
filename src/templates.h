@@ -43,24 +43,40 @@ PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
 "]";
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
-// TODO: colormode needs to be changeable:
-//    ct for colour temperature
-//    hs for hue / saturation
-//    xy for X Y coords for colour
 PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
-    "\"type\":\"Extended color light\","
-    "\"name\":\"%s\","
-    "\"uniqueid\":\"%s\","
-    "\"modelid\":\"LLM001\","
+    "\"type\": \"Extended color light\","
+    "\"name\": \"%s\","
+    "\"uniqueid\": \"%s\","
+    "\"modelid\": \"LLM001\","
+    "\"manufacturername\": \"Philips\","
+    "\"productname\": \"E4\","
     "\"state\":{"
-        "\"on\":%s,\"bri\":%d,\"xy\":[0,0],\"colormode\":\"%s\",\"hue\": %d,\"sat\":%d,\"effect\":\"none\",\"ct\":%d,\"reachable\": true"
+        "\"on\": %s,"
+	"\"bri\": %d,"
+	"\"xy\": [0,0],"
+    "\"colormode\": \"%s\","
+	"\"hue\": %d,"
+	"\"sat\": %d,"
+	"\"effect\": \"none\","
+	"\"ct\": %d,"
+	"\"mode\": \"homeautomation\","
+	"\"reachable\": true"
     "},"
-    "\"capabilities\":{"
-        "\"certified\":false,"
-        "\"streaming\":{\"renderer\":true,\"proxy\":false}"
+    "\"capabilities\": {"
+        "\"certified\": false,"
+        "\"streaming\": {\"renderer\":true,\"proxy\":false}"
     "},"
-    "\"swversion\":\"5.105.0.21169\""
+    "\"swversion\": \"5.105.0.21169\""
 "}";
+
+// Use shorter description template when listing all devices
+PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE_SHORT[] = "{"
+    "\"type\": \"Extended color light\","
+    "\"name\": \"%s\","
+    "\"uniqueid\": \"%s\""
+
+"}";
+
 
 PROGMEM const char FAUXMO_DESCRIPTION_TEMPLATE[] =
 "<?xml version=\"1.0\" ?>"

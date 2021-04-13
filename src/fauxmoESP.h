@@ -78,12 +78,12 @@ typedef struct {
     char * name;
     bool state;
     unsigned char value;
-    unsigned int hue;
+	unsigned int hue;
     unsigned int saturation;
     unsigned int ct;
     char colormode[3];  // This might have to change to an enum 
     unsigned char red, green, blue;
-    char uniqueid[13];
+	char uniqueid[28];
 } fauxmoesp_device_t;
 
 class fauxmoESP {
@@ -101,10 +101,10 @@ class fauxmoESP {
         int getDeviceId(const char * device_name);
         void setDeviceUniqueId(unsigned char id, const char *uniqueid);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
-        // These overloaded functions are starting to get ugly....
         bool setState(unsigned char id, bool state, unsigned char value);
         bool setState(const char * device_name, bool state, unsigned char value);
-        bool setState(unsigned char id, bool state, unsigned int hue, unsigned int saturation);
+		
+		bool setState(unsigned char id, bool state, unsigned int hue, unsigned int saturation);
         bool setState(const char * device_name, bool state, unsigned int hue, unsigned int saturation);
         bool setState(unsigned char id, bool state, unsigned int ct);
         bool setState(const char * device_name, bool state, unsigned int ct);
@@ -113,7 +113,7 @@ class fauxmoESP {
         uint8_t getGreen(unsigned char id);
         uint8_t getBlue(unsigned char id);
         char * getColormode(unsigned char id, char * buffer, size_t len);
-
+		
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
@@ -134,9 +134,9 @@ class fauxmoESP {
         AsyncClient * _tcpClients[FAUXMO_TCP_MAX_CLIENTS];
         TSetStateCallback _setCallback = NULL;
 
-        String _deviceJson(unsigned char id);
-
-        void _setRGBFromHSV(unsigned char id);
+        String _deviceJson(unsigned char id, bool all); 	// all = true means we are listing all devices so use full description template
+		
+		void _setRGBFromHSV(unsigned char id);
         void _adjustRGBFromValue(unsigned char id);
         void _setRGBFromCT(unsigned char id);
 
