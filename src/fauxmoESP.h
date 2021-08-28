@@ -102,6 +102,7 @@ class fauxmoESP {
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
         void setPort(unsigned long tcp_port) { _tcp_port = tcp_port; }
+	void setRedirect(unsigned long redirect_port) { _redirect_port = redirect_port; }
         void handle();
 
     private:
@@ -110,6 +111,7 @@ class fauxmoESP {
         bool _enabled = false;
         bool _internal = true;
         unsigned int _tcp_port = FAUXMO_TCP_PORT;
+	unsigned int _redirect_port = 0;
         std::vector<fauxmoesp_device_t> _devices;
 		#ifdef ESP8266
         WiFiEventHandler _handler;
