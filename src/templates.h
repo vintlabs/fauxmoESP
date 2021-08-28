@@ -40,7 +40,7 @@ PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
 "]";
 
 PROGMEM const char FAUXMO_REDIRECT[] = "<!DOCTYPE HTML><html><body>"
-"<script>window.location = '<http://'+window.location.hostname+':%d'+window.location.pathname+window.location.search;</script>"
+"<script>window.location = 'http://'+window.location.hostname+':%d'+window.location.pathname+window.location.search;</script>"
 "</body></html>";
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
