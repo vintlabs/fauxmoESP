@@ -39,6 +39,10 @@ PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
     "{\"success\":{\"/lights/%d/state/bri\":%d}}"   // not needed?
 "]";
 
+PROGMEM const char FAUXMO_REDIRECT[] = "<!DOCTYPE HTML><html><body>"
+"<script>window.location = '<http://'+window.location.hostname+':%d'+window.location.pathname+window.location.search;</script>">
+"</body></html>";
+
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
 PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
     "\"type\": \"Extended color light\","
