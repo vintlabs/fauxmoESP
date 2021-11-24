@@ -479,6 +479,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
   	device.state = false;
 	device.value = 0;
 	device.hue = 0;
+	device.sat = 0;
 
     // create the uniqueid
     String mac = WiFi.macAddress();
