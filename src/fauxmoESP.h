@@ -72,13 +72,14 @@ THE SOFTWARE.
 #include <MD5Builder.h>
 #include "templates.h"
 
-typedef std::function<void(unsigned char, const char *, bool, unsigned char)> TSetStateCallback;
+typedef std::function<void(unsigned char, const char *, bool, unsigned char, unsigned char, unsigned char)> TSetStateCallback;
 
 typedef struct {
     char * name;
     bool state;
     unsigned char value;
     unsigned char hue;
+    unsigned char sat;
     char uniqueid[28];
 } fauxmoesp_device_t;
 

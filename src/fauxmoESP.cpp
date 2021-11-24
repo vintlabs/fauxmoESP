@@ -301,7 +301,7 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 				response, sizeof(response),
 				FAUXMO_TCP_STATE_RESPONSE,
 				id+1, _devices[id].state ? "true" : "false", id+1, 
-				_devices[id].value, _devices[id].hue, _devices[id].sat
+				_devices[id].value, id+1, _devices[id].hue, id+1, _devices[id].sat
 			);
 			_sendTCPResponse(client, "200 OK", response, "text/xml");
 

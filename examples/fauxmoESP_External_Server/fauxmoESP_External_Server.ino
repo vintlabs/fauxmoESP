@@ -116,7 +116,10 @@ void setup() {
         
         // Callback when a command from Alexa is received. 
         // You can use device_id or device_name to choose the element to perform an action onto (relay, LED,...)
-        // State is a boolean (ON/OFF) and value a number from 0 to 255 (if you say "set kitchen light to 50%" you will receive a 128 here).
+        // State is a boolean (ON/OFF), value a number from 0 to 255 (if you say "set kitchen light to 50%" you will receive a 128 here),
+        // hue a number from 0 to 255, and sat a number from 0 to 255. You will be responsible for converting hue, saturation, and value 
+        // (HSV) to RGB. Here is a resource to get you started:
+        // https://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both  
         // Just remember not to delay too much here, this is a callback, exit as soon as possible.
         // If you have to do something more involved here set a flag and process it in your main loop.
         
@@ -124,7 +127,8 @@ void setup() {
         // if (1 == device_id) digitalWrite(RELAY2_PIN, state);
         // if (2 == device_id) analogWrite(LED1_PIN, value);
         
-        Serial.printf("[MAIN] Device #%d (%s) state: %s value: %d\n", device_id, device_name, state ? "ON" : "OFF", value);
+        Serial.printf("[MAIN] Device #%d (%s) state: %s brightness: %d | hue: %d | saturation: %d \n", 
+            device_id, device_name, state ? "ON" : "OFF", value, hue, sat);
 
         // For the example we are turning the same LED on and off regardless fo the device triggered or the value
         digitalWrite(LED, !state); // we are nor-ing the state because our LED has inverse logic.
