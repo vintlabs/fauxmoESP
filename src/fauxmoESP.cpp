@@ -277,11 +277,6 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 			if (pos > 0) {
 				unsigned char hue = body.substring(pos+5).toInt();
 				_devices[id].hue = hue;
-			} else if (body.indexOf("false") > 0) {
-				_devices[id].state = false;
-			} else {
-				_devices[id].state = true;
-				if (0 == _devices[id].hue) _devices[id].hue = 255;
 			}
 
 			// Saturation
@@ -289,11 +284,6 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 			if (pos > 0) {
 				unsigned char sat = body.substring(pos+5).toInt();
 				_devices[id].sat = sat;
-			} else if (body.indexOf("false") > 0) {
-				_devices[id].state = false;
-			} else {
-				_devices[id].state = true;
-				if (0 == _devices[id].sat) _devices[id].sat = 255;
 			}
 
 			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+10];
