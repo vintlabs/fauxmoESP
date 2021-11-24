@@ -127,7 +127,9 @@ String fauxmoESP::_deviceJson(unsigned char id, bool all = true) {
 			FAUXMO_DEVICE_JSON_TEMPLATE,
 			device.name, device.uniqueid,
 			device.state ? "true": "false",
-			device.value
+			device.value,
+			device.hue,
+			device.sat
 		);
 	}
 	else
@@ -270,16 +272,42 @@ bool fauxmoESP::_onTCPControl(AsyncClient *client, String url, String body) {
 				if (0 == _devices[id].value) _devices[id].value = 255;
 			}
 
+			// Hue
+			pos = body.indexOf("hue");
+			if (pos > 0) {
+				unsigned char hue = body.substring(pos+5).toInt();
+				_devices[id].hue = hue;
+			} else if (body.indexOf("false") > 0) {
+				_devices[id].state = false;
+			} else {
+				_devices[id].state = true;
+				if (0 == _devices[id].hue) _devices[id].hue = 255;
+			}
+
+			// Saturation
+			pos = body.indexOf("sat");
+			if (pos > 0) {
+				unsigned char sat = body.substring(pos+5).toInt();
+				_devices[id].sat = sat;
+			} else if (body.indexOf("false") > 0) {
+				_devices[id].state = false;
+			} else {
+				_devices[id].state = true;
+				if (0 == _devices[id].sat) _devices[id].sat = 255;
+			}
+
 			char response[strlen_P(FAUXMO_TCP_STATE_RESPONSE)+10];
 			snprintf_P(
 				response, sizeof(response),
 				FAUXMO_TCP_STATE_RESPONSE,
-				id+1, _devices[id].state ? "true" : "false", id+1, _devices[id].value
+				id+1, _devices[id].state ? "true" : "false", id+1, 
+				_devices[id].value, _devices[id].hue, _devices[id].sat
 			);
 			_sendTCPResponse(client, "200 OK", response, "text/xml");
 
 			if (_setCallback) {
-				_setCallback(id, _devices[id].name, _devices[id].state, _devices[id].value);
+				_setCallback(id, _devices[id].name, _devices[id].state, 
+				_devices[id].value, _devices[id].hue, _devices[id].sat);
 			}
 
 			return true;
@@ -449,7 +477,8 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
     // init properties
     device.name = strdup(device_name);
   	device.state = false;
-	  device.value = 0;
+	device.value = 0;
+	device.hue = 0;
 
     // create the uniqueid
     String mac = WiFi.macAddress();
@@ -513,20 +542,24 @@ char * fauxmoESP::getDeviceName(unsigned char id, char * device_name, size_t len
     return device_name;
 }
 
-bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value) {
+bool fauxmoESP::setState(unsigned char id, bool state, unsigned char value, unsigned char hue, unsigned char sat) {
     if (id < _devices.size()) {
 		_devices[id].state = state;
 		_devices[id].value = value;
+		_devices[id].hue = hue;
+		_devices[id].sat = sat;
 		return true;
 	}
 	return false;
 }
 
-bool fauxmoESP::setState(const char * device_name, bool state, unsigned char value) {
+bool fauxmoESP::setState(const char * device_name, bool state, unsigned char value, unsigned char hue, unsigned char sat) {
 	int id = getDeviceId(device_name);
 	if (id < 0) return false;
 	_devices[id].state = state;
 	_devices[id].value = value;
+	_devices[id].hue = hue;
+	_devices[id].sat = sat;
 	return true;
 }
 

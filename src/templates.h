@@ -36,7 +36,9 @@ PROGMEM const char FAUXMO_TCP_HEADERS[] =
 
 PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
     "{\"success\":{\"/lights/%d/state/on\":%s}},"
-    "{\"success\":{\"/lights/%d/state/bri\":%d}}"   // not needed?
+    "{\"success\":{\"/lights/%d/state/bri\":%d}},"   // not needed?
+    "{\"success\":{\"/lights/%d/state/hue\":%d}},"   // not needed?
+    "{\"success\":{\"/lights/%d/state/sat\":%d}}"   // not needed?
 "]";
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
@@ -51,8 +53,8 @@ PROGMEM const char FAUXMO_DEVICE_JSON_TEMPLATE[] = "{"
         "\"on\": %s,"
 	"\"bri\": %d,"
 	"\"xy\": [0,0],"
-	"\"hue\": 0,"
-	"\"sat\": 0,"
+	"\"hue\": %d,"
+	"\"sat\": %d,"
 	"\"effect\": \"none\","
 	"\"colormode\": \"xy\","
 	"\"ct\": 500,"
