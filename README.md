@@ -1,8 +1,8 @@
 # FauxmoESP
 
-Amazon Alexa support for ESP8266 and ESP32 devices.
+Amazon Alexa support for ESP8266, ESP32 and Raspberry Pi Pico W devices.
 
-This is a library for ESP8266/ESP32-based devices that emulates Philips Hue lights and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
+This is a library for ESP8266/ESP32-based/Raspberry Pi Pico W devices that emulates Philips Hue lights and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
 [![version](https://img.shields.io/badge/version-3.1.2-brightgreen.svg)](CHANGELOG.md)
 [![codacy](https://img.shields.io/codacy/grade/44478ddd58fe4cc6a2bc5598232663b8/master.svg)](https://www.codacy.com/app/xoseperez/fauxmoesp/dashboard)
@@ -45,6 +45,10 @@ ESP32:
 
 * This library uses [AsyncTCP][4] library by [me-no-dev][5]
 
+Raspberry Pi Pico
+
+* This library uses [AsyncTCP_RP2040W][8] library by [khoih-prog][9]
+
 ### PlatformIO
 
 If you are using PlatformIO (check the section bellow on how to compile it) the required libraries should be installed automatically.
@@ -59,6 +63,7 @@ You can look for it manually but I have gathered the URL here for convenience:
 |-|-|-|-|
 |ESP8266|**ESPAsyncTCP** by Hristo Gochkov ESP8266|[GIT](https://github.com/me-no-dev/ESPAsyncTCP)|[ZIP](https://github.com/me-no-dev/ESPAsyncTCP/archive/master.zip)|
 |ESP32|**AsyncTCP** by Hristo Gochkov ESP32|[GIT](https://github.com/me-no-dev/AsyncTCP)|[ZIP](https://github.com/me-no-dev/AsyncTCP/archive/master.zip)|
+|Raspberry Pi Pico W|**AsyncTCP_RP2040W** by Khoi Hoang |[GIT](https://github.com/khoih-prog/AsyncTCP_RP2040W)|[ZIP](https://github.com/khoih-prog/AsyncTCP_RP2040W/archive/master.zip)|
 
 ## Usage
 
@@ -115,6 +120,7 @@ Current status of the library:
 |ESP8266 Core 2.4.1|OK (2)|OK? (2)|OK (1, 2)|
 |ESP8266 Core 2.4.2|OK (2)|OK? (2)|OK (1, 2)|
 |ESP32|OK|OK?|OK (1)|
+|Raspberry Pi Pico W Core 2.6.0|OK|OK|OK (1)|
 
 (1) When using gen3 devices TCP port must be 80 always.
 (2) Arduino Core for ESP8266 requires LwIP set to "v1.4 Higher Bandwidth".
@@ -137,6 +143,9 @@ Current status of the library:
 [4]:https://github.com/me-no-dev/AsyncTCP
 [5]:https://github.com/me-no-dev
 [6]:https://github.com/makermusings/fauxmo
+[7]:https://github.com/earlephilhower/arduino-pico
+[8]:https://github.com/khoih-prog/AsyncTCP_RP2040W
+[9]:https://github.com/khoih-prog
 
 ## If you enjoy this, please consider supporting us by purchasing a module from us!
 http://www.vintlabs.com

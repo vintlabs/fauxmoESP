@@ -62,6 +62,8 @@ THE SOFTWARE.
 #elif defined(ESP32)
     #include <WiFi.h>
     #include <AsyncTCP.h>
+#elif defined(ARDUINO_RASPBERRY_PI_PICO_W)
+    #include <AsyncTCP_RP2040W.h>
 #else
 	#error Platform not supported
 #endif
