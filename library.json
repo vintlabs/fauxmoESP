@@ -1,7 +1,7 @@
 {
     "name": "FauxmoESP",
-    "keywords": "belkin,wemo,fauxmo,esp8266,esp32,alexa,amazon,echo,dot",
-    "description": "Amazon Alexa support for ESP8266 and ESP32 (Amazon Echo & Dot)",
+    "keywords": "belkin,wemo,fauxmo,esp8266,esp32,RaspberryPiPicoW,alexa,amazon,echo,dot",
+    "description": "Amazon Alexa support for ESP8266, ESP32 and Raspberry Pi Pico W (Amazon Echo & Dot)",
     "repository": {
         "type": "git",
         "url": "https://github.com/vintlabs/fauxmoESP"
@@ -10,7 +10,7 @@
     "license": "MIT",
     "exclude": "tests",
     "frameworks": "arduino",
-    "platforms": ["espressif8266", "espressif32"],
+    "platforms": ["espressif8266", "espressif32", "rp2040"],
     "authors": {
         "name": "Paul Vint",
         "email": "paul@vintlabs.com",
@@ -27,6 +27,11 @@
             "name": "AsyncTCP",
             "version": ">=1.0.1",
             "platforms": "espressif32"
+        },
+        {
+            "name": "AsyncTCP_RP2040W",
+            "version": ">=1.1.0",
+            "platforms": "rp2040"
         }
     ],
     "headers": "fauxmoESP.h"
