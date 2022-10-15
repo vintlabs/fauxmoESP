@@ -74,12 +74,14 @@ THE SOFTWARE.
 #include <MD5Builder.h>
 #include "templates.h"
 
-typedef std::function<void(unsigned char, const char *, bool, unsigned char)> TSetStateCallback;
+typedef std::function<void(unsigned char, const char *, bool, unsigned char, unsigned char, unsigned char)> TSetStateCallback;
 
 typedef struct {
     char * name;
     bool state;
     unsigned char value;
+    unsigned char hue;
+    unsigned char sat;
     char uniqueid[28];
 } fauxmoesp_device_t;
 
@@ -98,8 +100,8 @@ class fauxmoESP {
         int getDeviceId(const char * device_name);
         void setDeviceUniqueId(unsigned char id, const char *uniqueid);
         void onSetState(TSetStateCallback fn) { _setCallback = fn; }
-        bool setState(unsigned char id, bool state, unsigned char value);
-        bool setState(const char * device_name, bool state, unsigned char value);
+        bool setState(unsigned char id, bool state, unsigned char value, unsigned char hue, unsigned char sat);
+        bool setState(const char * device_name, bool state, unsigned char value, unsigned char hue, unsigned char sat);
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
