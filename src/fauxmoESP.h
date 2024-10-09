@@ -81,7 +81,7 @@ typedef struct {
     char * name;
     bool state;
     unsigned char value;
-    byte rgb[4];
+    byte rgb[3] = {255, 255, 255};
     char uniqueid[FAUXMO_DEVICE_UNIQUE_ID_LENGTH];
 } fauxmoesp_device_t;
 
