@@ -525,6 +525,7 @@ unsigned char fauxmoESP::addDevice(const char * device_name) {
 
     snprintf(device.uniqueid, FAUXMO_DEVICE_UNIQUE_ID_LENGTH, "%s:%s-%02X", mac.c_str(), "00:00", device_id);
 
+
     // Attach
     _devices.push_back(device);
 
