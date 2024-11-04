@@ -9,7 +9,7 @@ This is a library for ESP8266/ESP32-based/Raspberry Pi Pico W devices that emula
 
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/pjvint)
 
-## NEW! Discussions on Github
+## Discussions on Github
 We now have a place for general discussion, ideas, projects etc. - https://github.com/vintlabs/fauxmoESP/discussions
 
 ## Notice
