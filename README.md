@@ -8,19 +8,16 @@ This is a library for ESP8266/ESP32-based/Raspberry Pi Pico W devices that emula
 [![codacy](https://img.shields.io/codacy/grade/44478ddd58fe4cc6a2bc5598232663b8/master.svg)](https://www.codacy.com/app/xoseperez/fauxmoesp/dashboard)
 [![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
-[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=xose%2eperez%40gmail%2ecom&lc=US&no_note=0&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest)
-[![twitter](https://img.shields.io/twitter/follow/xoseperez.svg?style=social)](https://twitter.com/intent/follow?screen_name=xoseperez)
+[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=SG9L5ZCDLXTMC)
 
 ## NEW! Discussions on Github
-We now have a place for general discussion, ideas, projects etc. - https://github.com/vintlabs/fauxmoESP/discussions/133
+We now have a place for general discussion, ideas, projects etc. - https://github.com/vintlabs/fauxmoESP/discussions
 
 ## Notice
 
 **As of October 2020 https://github.com/vintlabs/fauxmoESP is the new home for fauxmoESP!!**
 
 **Many thanks for all of the work that Xose Perez has put into this project!**
-
-*I have migrated all of the issues from the old repo on Bitbucket here to GitHub, and I have closed many stale issues. If I have closed an issue that you feel should still be open, feel free to reopen it or submit a new one.*
 
 
 ## History
