@@ -313,7 +313,17 @@ bool fauxmoESP::_onTCPRequest(AsyncClient *client, bool isGet, String url, Strin
        		return _onTCPControl(client, url, body);
 		}
 	}
-
+         
+	if (_redirect_port!=0){
+    		char response[strlen_P(FAUXMO_REDIRECT)+5];
+        	snprintf_P(
+            	response, sizeof(response),
+            	FAUXMO_REDIRECT,
+            	_redirect_port
+        	);
+    	_sendTCPResponse(client, "200 OK", response, "text/html");
+	}
+	
 	return false;
 
 }
