@@ -5,10 +5,9 @@ Amazon Alexa support for ESP8266, ESP32 and Raspberry Pi Pico W devices.
 This is a library for ESP8266/ESP32-based/Raspberry Pi Pico W devices that emulates Philips Hue lights and thus allows you to control them using this protocol, in particular from Alexa-powered devices like the Amazon Echo or the Dot.
 
 [![version](https://img.shields.io/badge/version-3.1.2-brightgreen.svg)](CHANGELOG.md)
-[![codacy](https://img.shields.io/codacy/grade/44478ddd58fe4cc6a2bc5598232663b8/master.svg)](https://www.codacy.com/app/xoseperez/fauxmoesp/dashboard)
 [![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
-[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=SG9L5ZCDLXTMC)
+[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/pjvint)
 
 ## NEW! Discussions on Github
 We now have a place for general discussion, ideas, projects etc. - https://github.com/vintlabs/fauxmoESP/discussions
