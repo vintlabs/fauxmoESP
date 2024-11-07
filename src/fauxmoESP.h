@@ -75,11 +75,13 @@ THE SOFTWARE.
 #include "templates.h"
 
 typedef std::function<void(unsigned char, const char *, bool, unsigned char)> TSetStateCallback;
+typedef std::function<void(unsigned char, const char *, bool, unsigned char, byte *)> TSetStateWithColorCallback;
 
 typedef struct {
     char * name;
     bool state;
     unsigned char value;
+    byte rgb[3] = {255, 255, 255};
     char uniqueid[FAUXMO_DEVICE_UNIQUE_ID_LENGTH];
 } fauxmoesp_device_t;
 
@@ -97,9 +99,12 @@ class fauxmoESP {
         char * getDeviceName(unsigned char id, char * buffer, size_t len);
         int getDeviceId(const char * device_name);
         void setDeviceUniqueId(unsigned char id, const char *uniqueid);
-        void onSetState(TSetStateCallback fn) { _setCallback = fn; }
+        void onSetState(TSetStateCallback fn) { _setStateCallback = fn; }
+        void onSetState(TSetStateWithColorCallback fn) { _setStateWithColorCallback = fn; }
         bool setState(unsigned char id, bool state, unsigned char value);
         bool setState(const char * device_name, bool state, unsigned char value);
+        bool setState(unsigned char id, bool state, unsigned char value, byte* rgb);
+        bool setState(const char * device_name, bool state, unsigned char value, byte* rgb);
         bool process(AsyncClient *client, bool isGet, String url, String body);
         void enable(bool enable);
         void createServer(bool internal) { _internal = internal; }
@@ -118,7 +123,8 @@ class fauxmoESP {
 		#endif
         WiFiUDP _udp;
         AsyncClient * _tcpClients[FAUXMO_TCP_MAX_CLIENTS];
-        TSetStateCallback _setCallback = NULL;
+        TSetStateCallback _setStateCallback = NULL;
+        TSetStateWithColorCallback _setStateWithColorCallback = NULL;
 
         String _deviceJson(unsigned char id, bool all); 	// all = true means we are listing all devices so use full description template
 
@@ -136,4 +142,6 @@ class fauxmoESP {
 
         String _byte2hex(uint8_t zahl);
         String _makeMD5(String text);
+        byte* _hs2rgb(uint16_t hue, uint8_t sat);
+        byte* _ct2rgb(uint16_t ct);
 };
