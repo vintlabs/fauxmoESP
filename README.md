@@ -6,6 +6,7 @@ This is a library for ESP8266/ESP32-based/Raspberry Pi Pico W devices that emula
 
 [![license](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
+## Feel like donating a bit to help fund buying real Hue devices to assist development? 
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/pjvint)
 
 ## Discussions on Github
