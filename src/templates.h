@@ -35,8 +35,7 @@ PROGMEM const char FAUXMO_TCP_HEADERS[] =
     "Connection: close\r\n\r\n";
 
 PROGMEM const char FAUXMO_TCP_STATE_RESPONSE[] = "["
-    "{\"success\":{\"/lights/%d/state/on\":%s}},"
-    "{\"success\":{\"/lights/%d/state/bri\":%d}}"   // not needed?
+    "{\"success\":{\"/lights/%d/state/on\":%s}}"
 "]";
 
 // Working with gen1 and gen3, ON/OFF/%, gen3 requires TCP port 80
